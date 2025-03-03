@@ -16,10 +16,8 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 class InputMethodEditor
 {
 private:
-    const uint COLIMN_PINS[4] = 
-    {};
-    const uint ROW_PINS[4] = 
-    {};
+    static constexpr uint PIN_COLUMNS[4] = {5, 6, 7, 8};
+    static constexpr uint PIN_ROWs[4] = {9, 10, 11, 12};
 
     enum SleepDuration 
     {
@@ -27,7 +25,7 @@ private:
         EMERGENCY = 2727,
     };
 
-    const char keys[4][4] = 
+    static constexpr char keys[4][4] = 
     {
         {'7', '8', '9', '\b'},
         {'4', '5', '6', '\r'},
@@ -35,7 +33,7 @@ private:
         {'0', '.', '/', '\f'},
     };
 
-    const char LETTERS[12][5] = 
+    static constexpr char LETTERS[12][5] = 
     {
         {'.', ',', ':', '>', '<'},
         {'*', '+', '-', '/', '='},
@@ -70,7 +68,6 @@ public:
     bool raw = false;
     bool can_sleep = false;
 
-    uint keypad_init();
     char wait4input();
     void reset();
 };

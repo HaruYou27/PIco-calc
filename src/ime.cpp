@@ -17,31 +17,27 @@ InputMethodEditor *InputMethodEditor::get_singleton()
 {
     if (singleton == nullptr)
     {
+        for (int index = 0; index < 4; index++)
+        {
+            gpio_init(PIN_COLUMNS[index]);
+            gpio_init(PIN_ROWs[index]);
+        
+            gpio_set_dir(PIN_COLUMNS[index], false);
+            gpio_set_dir(PIN_ROWs[index], true);
+        
+            gpio_put(PIN_COLUMNS[index], false);
+        }
+
         singleton = new InputMethodEditor();
     }
     return singleton;
-}
-
-uint InputMethodEditor::keypad_init(void)
-{
-    for (int index = 0; index < 4; index++)
-    {
-        gpio_init(COLIMN_PINS[index]);
-        gpio_init(ROW_PINS[index]);
-
-        gpio_set_dir(COLIMN_PINS[index], false);
-        gpio_set_dir(ROW_PINS[index], true);
-
-        gpio_put(COLIMN_PINS[index], false);
-        gpio_put(ROW_PINS[index], true);
-    }
 }
 
 char InputMethodEditor::scan_keys(void)
 {
     for (int row = 0; row < 4; row++)
     {
-        gpio_put(ROW_PINS[row], true);
+        gpio_put(PIN_ROWs[row], true);
         sleep_ms(SleepDuration::SCAN);
 
         for (int column; column < 4; column++)
@@ -54,11 +50,11 @@ char InputMethodEditor::scan_keys(void)
                     sleep_ms(SleepDuration::SCAN);
                 }
 
-                gpio_put(ROW_PINS[row], false);
+                gpio_put(PIN_ROWs[row], false);
                 return keys[row][column];
             }
         }
-        gpio_put(ROW_PINS[row], false);
+        gpio_put(PIN_ROWs[row], false);
     }
     return 0;
 }
@@ -92,16 +88,16 @@ char InputMethodEditor::wait4input()
         {
             // Emergency sleep !
             reset();
-            renderer->toggle_display(false);
-            gpio_put(ROW_PINS[0], true);
+            //renderer->toggle_display(false);
+            gpio_put(PIN_ROWs[0], true);
 
-            while (gpio_get(COLIMN_PINS[3]))
+            while (gpio_get(PIN_COLUMNS[3]))
             {
                 sleep_ms(SleepDuration::EMERGENCY);
             }
 
-            renderer->toggle_display(true);
-            gpio_put(ROW_PINS[0], false);
+            //renderer->toggle_display(true);
+            gpio_put(PIN_ROWs[0], false);
         }
 
         time_passed += 40;
