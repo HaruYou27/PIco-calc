@@ -19,5 +19,6 @@ CMakeUserPresets.json
 
 # Built Visual Studio Code Extensions
 *.vsix
-build/*
+
 test/keypad/build/*
+*.mpy
