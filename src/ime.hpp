@@ -17,35 +17,34 @@ class InputMethodEditor
 {
 private:
     static constexpr uint PIN_COLUMNS[4] = {5, 6, 7, 8};
-    static constexpr uint PIN_ROWs[4] = {9, 10, 11, 12};
+    static constexpr uint PIN_ROWs[4] = {13, 14, 15, 16};
 
     enum SleepDuration 
     {
-        SCAN = 10,
+        SCAN = 4,
         EMERGENCY = 2727,
     };
 
     static constexpr char keys[4][4] = 
     {
-        {'7', '8', '9', '\b'},
-        {'4', '5', '6', '\r'},
-        {'1', '2', '3', '\e'},
-        {'0', '.', '/', '\f'},
+        {'\r', '\b', ' ', ' '},
+        {'7', '8', '9', '\e'},
+        {'4', '5', '6', '0'},
+        {'1', '2', '3', '*'},
     };
 
-    static constexpr char LETTERS[12][5] = 
+    static constexpr char LETTERS[11][5] = 
     {
-        {'.', ',', ':', '>', '<'},
         {'*', '+', '-', '/', '='},
-        {'0', ' ', '_', '%', '|'},
-        {'1', '(', ')', '[', ']'},
-        {'2', 'a', 'b', 'c', '?'},
+        {'0', ' ', '_', '|', '%'},
+        {'1', '.', ';', ':', '>'},
+        {'2', 'a', 'b', 'c', '&'},
         {'3', 'd', 'e', 'f', '!'},
         {'4', 'g', 'h', 'i', '#'},
         {'5', 'j', 'k', 'l', '$'},
         {'6', 'm', 'n', 'o', '~'},
         {'7', 'p', 'q', 'r', 's'},
-        {'8', 't', 'u', 'v', '&'},
+        {'8', 't', 'u', 'v', '?'},
         {'9', 'w', 'x', 'y', 'z'},
     };
     int press_count = 0;

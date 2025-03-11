@@ -73,7 +73,7 @@ char InputMethodEditor::get_char()
         press_count = 0;
     }
 
-    char letter = LETTERS[current_key-46][press_count];
+    char letter = LETTERS[current_key-45][press_count];
     return (upper_case) ? toupper(letter) : letter;
 }
 
@@ -100,7 +100,7 @@ char InputMethodEditor::wait4input()
             gpio_put(PIN_ROWs[0], false);
         }
 
-        time_passed += 40;
+        time_passed += 16;
     }
 
     if (raw || iscntrl(key))
@@ -119,6 +119,6 @@ char InputMethodEditor::wait4input()
         return get_char();
     }
     current_key = key;
-    press_count = 0;
-    return get_char();
+    reset();
+    return '\r';
 }
