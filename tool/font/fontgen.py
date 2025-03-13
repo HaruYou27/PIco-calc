@@ -9,13 +9,13 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 from PIL import Image
 import os.path
 
-img = Image.open(r"moonbench3x5.png")
-OUTPUT_H = "moonbench3x5.h"
-FONT_NAME = "MoonBench3x5MONO"
+img = Image.open(r"moonbench4x8.png")
+OUTPUT_H = "output/moonbench4x8.h"
+FONT_NAME = "MoonBench4x8MONO"
 FONTSTR = """ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
-CHAR_WIDTH = 3
-CHAR_HEIGHT = 5
-GLYPH_WIDTH = 4
+CHAR_WIDTH = 4
+CHAR_HEIGHT = 8
+GLYPH_WIDTH = CHAR_WIDTH
 
 #### Convert to C-header format
 f = open(OUTPUT_H, 'w')

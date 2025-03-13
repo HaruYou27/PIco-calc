@@ -41,7 +41,7 @@ void RenderServer::print_menu(const char *title, const char *menu[])
     }
 }
 
-void RenderServer::print_line(const char *text, uint8_t line, bool invert = false)
+void RenderServer::print_line(const char *text, uint8_t line, bool invert)
 {
     if (line > 9)
     {

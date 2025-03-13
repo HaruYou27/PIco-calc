@@ -9,12 +9,15 @@ project(PIcoCalc)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+add_subdirectory(pico-vfs)
 pico_enable_filesystem(${CMAKE_PROJECT_NAME})
 
 add_executable(${CMAKE_PROJECT_NAME}
-    main.cpp
+    main.cpp 
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} pico_stdlib)
+target_link_libraries(${CMAKE_PROJECT_NAME} pico_stdlib hardware_i2c)
+
+pico_add_extra_outputs(${CMAKE_PROJECT_NAME})
 
 # rest of your project

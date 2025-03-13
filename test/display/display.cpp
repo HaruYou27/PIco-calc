@@ -10,21 +10,26 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 int main()
 {
+    gpio_init(25);
+    gpio_set_dir(25, GPIO_OUT);
+    gpio_put(25, true);
+
     SSD1306 *oled = new SSD1306(16, 17, i2c0);
+    static constexpr uint32_t DELAY = 3000;
 
     bool tick = true;
     while (true)
     {
         tick = !tick;
-        oled->print_overwrite("Hello world !", tick);
-        sleep_ms(3000);
         oled->print_overwrite("Konichiwa Sekai !", tick);
-        sleep_ms(3000);
+        sleep_ms(DELAY);
+        oled->print_overwrite("Hello world !", tick);
+        sleep_ms(DELAY);
         oled->print_overwrite("Raspberry pi pico", tick);
-        sleep_ms(3000);
+        sleep_ms(DELAY);
         oled->print_overwrite("HaruYou27", tick);
-        sleep_ms(3000);
-        oled->print_overwrite("Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit, sed\ndo eiusmod tempor incididunt ut\nlabore et dolore magna aliqua.\nUt enim ad minim veniam, quis\nnostrud exercitation ullamco\nlaboris nisi ut aliquip ex ea\ncommodo consequat. Duis aute\nirure dolor in reprehenderit in\nvoluptate velit esse cillum\ndolore eu fugiat nulla pariatur.", tick);
-        sleep_ms(3000);
+        sleep_ms(DELAY);
+        oled->print_overwrite("Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit, sed\ndo eiusmod tempor incididunt ut\nlabore et dolore magna aliqua.\nUt enim ad minim veniam, quis\nnostrud exercitation ullamco\nlaboris nisi ut aliquip ex ea\ncommodo consequat. Duis aute", tick);
+        sleep_ms(DELAY);
     }
 }
