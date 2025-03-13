@@ -25,55 +25,70 @@ void SSD1306::clear_screen()
 	}
 }
 
-// Minimize i2c write.
-void SSD1306::clear_text()
+void SSD1306::draw_blanks(int count, bool invert = false)
 {
-	uint8_t end_x = text_x / (FONT_WIDTH+1);
-	uint8_t end_y = text_y;
-	uint8_t row = text_y / (FONT_HEIGHT+1);
-	text_x = 0;
-	text_y = 0;
-
-	if (row-- == 0)
+	for (int index = 0; index < count; index++)
 	{
+		draw_char(' ', invert);
+	}
+}
+
+void SSD1306::clear_text_until(int end_y, int end_x)
+{
+	if (end_y <= 0)
+	{
+		draw_blanks(end_x);
 		return;
 	}
 
-	for (uint8_t y = 0; y < row; y++)
+	for (int y = 0; y < end_y; y++)
 	{
-		for (int x = 0; x < MAX_CHARACTER_PER_ROW; x++)
-		{
-			draw_char(' ');
-		}
+		draw_blanks(MAX_CHARACTER_PER_ROW);
 		draw_char('\n');
 	}
 
-	for (uint8_t x = 0; x < end_x; x++)
-	{
-		draw_char(' ');
-	}
+	draw_blanks(end_x);
+}
+
+// Minimize i2c write.
+void SSD1306::clear_text()
+{
+	int end_x = text_x / (GLYPH_WIDTH);
+	int end_y = text_y / (GLYPH_HEIGHT);
+	text_x = 0;
+	text_y = 0;
+
+	clear_text_until(end_y, end_x);
 
 	text_x = 0;
 	text_y = 0;
 }
 
-void SSD1306::draw_char(char character)
+void SSD1306::draw_char(char character, bool invert)
 {
 	if (character == '\n')
 	{
 		text_x = 0;
-		text_y = (text_y >= SCREEN_HEIGHT-1-FONT_HEIGHT) ? SCREEN_HEIGHT : text_y + FONT_HEIGHT + 1;
+		text_y = (text_y >= SCREEN_HEIGHT) ? 0 : text_y + GLYPH_HEIGHT;
 		return;
 	}
 
-	for (uint8_t index = 0; index < FONT_WIDTH; index++)
+	for (int index = 0; index < FONT_WIDTH; index++)
 	{
 		set_write_position(text_x++, text_y);
-		send_data(FONT_MOONBENCH3x5MONO[character-32][index]);
+
+		uint8_t line = FONT_MOONBENCH3x5MONO[character-32][index];
+		if (invert)
+		{
+			line = 0xff - line;
+		}
+		send_data(line);
 	}
+
 	if (++text_x >= SCREEN_WIDTH)
 	{
-		text_x = SCREEN_WIDTH;
+		text_x = 0;
+		text_y = (text_y >= SCREEN_HEIGHT) ? 0 : text_y + GLYPH_HEIGHT;
 	}
 }
 
@@ -85,17 +100,18 @@ int SSD1306::send_data(uint8_t data)
 	return i2c_write(buffer, 2);
 }
 
-void SSD1306::set_char_pos(uint8_t x, uint8_t y)
+void SSD1306::set_char_pos(uint8_t column, uint8_t line)
 {
-	text_x = x * (FONT_WIDTH+1);
-	text_y = y * (FONT_HEIGHT+1);
-	if (text_x > SCREEN_WIDTH)
+	text_x = column * (GLYPH_WIDTH);
+	text_y = line * (GLYPH_HEIGHT);
+
+	if (text_x >= SCREEN_WIDTH)
 	{
-		text_x = SCREEN_WIDTH;
+		text_x = 0;
 	}
-	if (text_y > SCREEN_HEIGHT)
+	if (text_y >= SCREEN_HEIGHT)
 	{
-		text_y = SCREEN_HEIGHT;
+		text_y = 0;
 	}
 }
 
@@ -107,7 +123,7 @@ int SSD1306::set_contrast(uint8_t value)
 
 int SSD1306::set_write_position(uint8_t x, uint8_t y)
 {
-	send_command(0x10 | (uint8_t)(x >> 4)); /* higher column address */
+	send_command(0x10 | static_cast<uint8_t>(x >> 4)); /* higher column address */
 	send_command(x & 0x0F);          /* lower column address */
 	return send_command(0xB0 + (y / SSD1306_PAGE_HEIGHT));  /* row address */
 }
@@ -125,11 +141,52 @@ int SSD1306::send_command(uint8_t command)
 	return i2c_write(buffer, 2);
 }
 
-int SSD1306::print_text(std::string &text)
+void SSD1306::print_line(const char *text, uint8_t line, bool invert = false)
 {
-	for (auto &character : text)
+	set_char_pos(0, line);
+	int column = 0;
+	while (column++ < MAX_CHARACTER_PER_ROW || *text)
 	{
-		draw_char(character);
+		draw_char(*text, invert);
+		++text;
+	}
+	draw_blanks(MAX_CHARACTER_PER_ROW - column, invert);
+}
+
+// Overwrite on screen text. Less i2c write than clear_text() then print_append()
+void SSD1306::print_overwrite(const char *text, bool invert = false)
+{
+	int end_x = text_x;
+	int end_y = text_y;
+	text_x = 0;
+	text_y = 0;
+
+	print_append(text, invert);
+
+	end_y -= static_cast<int>(text_y);
+	end_x -= static_cast<int>(text_x);
+	if (end_y < 0 || (!end_y && end_x <= 0))
+	{
+		return;
+	}
+
+	end_y /= (GLYPH_HEIGHT);
+	end_x /= (GLYPH_WIDTH);
+	uint8_t current_pos_x = text_x;
+	uint8_t current_pos_y = text_y;
+
+	clear_text_until(end_y, end_x);
+
+	text_x = current_pos_x;
+	text_y = current_pos_y;
+}
+
+void SSD1306::print_append(const char *text, bool invert = false)
+{
+	while (*text != 0)
+	{
+		draw_char(*text, invert);
+		++text;
 	}
 }
 

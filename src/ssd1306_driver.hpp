@@ -11,9 +11,6 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
-#include "pico/binary_info.h"
-
-#include <string>
 
 class SSD1306
 {
@@ -153,8 +150,10 @@ private:
     static constexpr uint8_t SCREEN_HEIGHT = 64;
     static constexpr uint8_t BAUDRATE = 400000;
 
-	static constexpr uint8_t FONT_WIDTH = 3;
+	static constexpr int FONT_WIDTH = 3;
 	static constexpr uint8_t FONT_HEIGHT = 5;
+	static constexpr uint8_t GLYPH_WIDTH = FONT_WIDTH + 1;
+	static constexpr uint8_t GLYPH_HEIGHT = FONT_HEIGHT + 1;
 
     i2c_inst_t *i2c;
     uint8_t text_x = 0;
@@ -165,6 +164,10 @@ private:
 	int i2c_write(uint8_t* buffer, const int length);
     int send_command(uint8_t command);
 	int send_data(uint8_t data);
+
+	int set_write_position(uint8_t x, uint8_t y);
+	void draw_blanks(int count, bool invert = false);
+	void clear_text_until(int end_y, int end_x);
 public:
     void operator=(const SSD1306 &) = delete;
     SSD1306(const SSD1306 &copy) = delete;
@@ -174,14 +177,17 @@ public:
 	static constexpr int MAX_ROW = SCREEN_HEIGHT / (FONT_HEIGHT+1);
 
 	int set_contrast(uint8_t value);
-    int set_write_position(uint8_t x, uint8_t y);
+    
 	void clear_screen();
 	//void draw_image();
 
-	void set_char_pos(uint8_t x, uint8_t y);
+	void set_char_pos(uint8_t column, uint8_t line);
 	void clear_text();
-	void draw_char(char character);
-	int print_text(std::string &text);
+	void draw_char(char character, bool invert = false);
+
+	void print_append(const char *text, bool invert = false);
+	void print_overwrite(const char *text, bool invert = false);
+	void print_line(const char *text, uint8_t line, bool invert = false);
 };
 
 #endif

@@ -6,39 +6,25 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
-#ifndef RENDER_SERVER_HPP
-#define RENDER_SERVER_HPP
-
-#include <string>
-#include <math.h>
-#include <ctype.h>
-
 #include "ssd1306_driver.hpp"
 
-class RenderServer
+int main()
 {
-private:
-    static RenderServer *singleton;
-    
-    RenderServer();
+    SSD1306 *oled = new SSD1306(16, 17, i2c0);
 
-    bool is_screen_on = false;
-public:
-    void operator=(const RenderServer &) = delete;
-    RenderServer(const RenderServer &copy) = delete;
-    static RenderServer *get_singleton();
-
-    static SSD1306 *screen0;
-    static SSD1306 *screen1;
-    
-    void clear_text();
-    void clear_screen();
-    void print_overwrite();
-
-    void print_menu(const char *title, const char *menu[]);
-    void print_line(const char *text, uint8_t line, bool invert = false);
-
-    static void text_wrap(std::string &text);
-};
-
-#endif
+    bool tick = true;
+    while (true)
+    {
+        tick = !tick;
+        oled->print_overwrite("Hello world !", tick);
+        sleep_ms(3000);
+        oled->print_overwrite("Konichiwa Sekai !", tick);
+        sleep_ms(3000);
+        oled->print_overwrite("Raspberry pi pico", tick);
+        sleep_ms(3000);
+        oled->print_overwrite("HaruYou27", tick);
+        sleep_ms(3000);
+        oled->print_overwrite("Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit, sed\ndo eiusmod tempor incididunt ut\nlabore et dolore magna aliqua.\nUt enim ad minim veniam, quis\nnostrud exercitation ullamco\nlaboris nisi ut aliquip ex ea\ncommodo consequat. Duis aute\nirure dolor in reprehenderit in\nvoluptate velit esse cillum\ndolore eu fugiat nulla pariatur.", tick);
+        sleep_ms(3000);
+    }
+}

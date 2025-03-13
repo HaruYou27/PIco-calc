@@ -8,8 +8,11 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 #include "render_server.hpp"
 
+using namespace std;
+
 RenderServer::RenderServer() {}
 RenderServer *RenderServer::singleton = nullptr;
+
 RenderServer *RenderServer::get_singleton()
 {
     if (singleton == nullptr)
@@ -19,6 +22,33 @@ RenderServer *RenderServer::get_singleton()
         singleton = new RenderServer();
     }
     return singleton;
+}
+
+void RenderServer::print_menu(const char *title, const char *menu[])
+{
+    screen0->print_line(title, 0, true);
+    screen0->print_line(menu[0], 1, true);
+
+    uint8_t index = 1;
+    while (menu[index] != NULL || index < 19)
+    {
+        if (index > 8)
+        {
+            screen1->print_line(menu[index], ++index);
+            continue;
+        }
+        screen0->print_line(menu[index], ++index);
+    }
+}
+
+void RenderServer::print_line(const char *text, uint8_t line, bool invert = false)
+{
+    if (line > 9)
+    {
+        screen1->print_line(text, line, invert);
+        return;
+    }
+    screen0->print_line(text, line, invert);
 }
 
 void RenderServer::clear_text()
@@ -34,7 +64,7 @@ void RenderServer::clear_screen()
 }
 
 // Return discard position.
-void RenderServer::text_wrap_mpy(std::string &text)
+void RenderServer::text_wrap(string &text)
 {
     if (text.length() <= SSD1306::MAX_CHARACTER_PER_ROW)
     {
@@ -46,9 +76,11 @@ void RenderServer::text_wrap_mpy(std::string &text)
     {
         row = SSD1306::MAX_ROW*2;
     }
+
+    int index = 0;
     for (int index_row = 1; index_row <= row; index_row++)
     {
-        int index = SSD1306::MAX_CHARACTER_PER_ROW * index_row;
+        index += SSD1306::MAX_CHARACTER_PER_ROW;
         char character = text.at(index);
 
         if (isblank(character) || character == ':' || character == '.' || character == ',' || character == ';')
@@ -65,7 +97,7 @@ void RenderServer::text_wrap_mpy(std::string &text)
 
         while (isalpha(character))
         {
-            character = text[--index];
+            character = text.at(--index);
         }
     }
 }

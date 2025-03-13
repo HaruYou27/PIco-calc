@@ -9,10 +9,12 @@ project(PIcoCalc)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-add_executable(PIcoCalc
+pico_enable_filesystem(${CMAKE_PROJECT_NAME})
+
+add_executable(${CMAKE_PROJECT_NAME}
     main.cpp
 )
 
-target_link_libraries(PIcoCalc pico_stdlib)
+target_link_libraries(${CMAKE_PROJECT_NAME} pico_stdlib)
 
 # rest of your project

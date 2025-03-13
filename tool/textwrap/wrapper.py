@@ -8,6 +8,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 import os
 import textwrap
+import unicodedata
 
 os.makedirs("output", exist_ok=True)
 
@@ -18,7 +19,20 @@ for path in os.listdir():
         text = file.read()
         file.close()
 
-        file_output = open(os.path.join("output/", path), "w", encoding="ascii")
-        file_output.write(textwrap.fill(text, 32, replace_whitespace=False))
+        text = unicodedata.normalize("NFKD", text)
+        # Filter out diacritics and keep only ASCII characters
+        text_ascii = "".join(char for char in text if not unicodedata.combining(char))
+
+        text = text_ascii
+        text = textwrap.fill(text, 32, replace_whitespace=False)
+        text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+
+        name = path.replace(".txt", "")
+        name = textwrap.shorten(name, 32, placeholder="")
+        path = path.replace(".txt", ".h")
+        text = f'static constexpr unsigned char {name}[] = "{text}";'
+
+        file_output = open(os.path.join("output/", path), "w")
+        file_output.write(text)
         file_output.close()
 

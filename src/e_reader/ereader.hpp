@@ -6,39 +6,14 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
-#ifndef RENDER_SERVER_HPP
-#define RENDER_SERVER_HPP
+#ifndef E_READER_HPP
+#define E_READER_HPP
 
-#include <string>
-#include <math.h>
-#include <ctype.h>
+#include "application.hpp"
 
-#include "ssd1306_driver.hpp"
-
-class RenderServer
+class eReader : Application
 {
-private:
-    static RenderServer *singleton;
-    
-    RenderServer();
-
-    bool is_screen_on = false;
 public:
-    void operator=(const RenderServer &) = delete;
-    RenderServer(const RenderServer &copy) = delete;
-    static RenderServer *get_singleton();
-
-    static SSD1306 *screen0;
-    static SSD1306 *screen1;
-    
-    void clear_text();
-    void clear_screen();
-    void print_overwrite();
-
-    void print_menu(const char *title, const char *menu[]);
-    void print_line(const char *text, uint8_t line, bool invert = false);
-
-    static void text_wrap(std::string &text);
+    virtual int main() override;
 };
-
 #endif

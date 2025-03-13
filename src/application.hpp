@@ -6,39 +6,26 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
-#ifndef RENDER_SERVER_HPP
-#define RENDER_SERVER_HPP
+#ifndef APPLICATION_HPP
+#define APPLICATION_HPP
 
-#include <string>
-#include <math.h>
-#include <ctype.h>
+#include "render_server.hpp"
+#include "ime.hpp"
 
-#include "ssd1306_driver.hpp"
-
-class RenderServer
+class Application
 {
 private:
-    static RenderServer *singleton;
-    
-    RenderServer();
+    uint8_t cursor = 0;
+protected:
+    RenderServer *renderer;
 
-    bool is_screen_on = false;
+    virtual void set_cursor(uint8_t value, const char *menu[]);
+    uint8_t get_cursor();
 public:
-    void operator=(const RenderServer &) = delete;
-    RenderServer(const RenderServer &copy) = delete;
-    static RenderServer *get_singleton();
-
-    static SSD1306 *screen0;
-    static SSD1306 *screen1;
+    virtual int main();
     
-    void clear_text();
-    void clear_screen();
-    void print_overwrite();
-
-    void print_menu(const char *title, const char *menu[]);
-    void print_line(const char *text, uint8_t line, bool invert = false);
-
-    static void text_wrap(std::string &text);
+    Application();
+    ~Application();
 };
 
 #endif
