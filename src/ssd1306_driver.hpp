@@ -12,6 +12,9 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
+#include <algorithm>
+#include <vector>
+
 class SSD1306
 {
 private:
@@ -95,13 +98,13 @@ static constexpr unsigned char MoonBench4x8MONO[96][4] = {
 	{0x00,0x7c,0x40,0x00}, // l
 	{0x00,0x7c,0x0c,0x7c}, // m
 	{0x00,0x7c,0x04,0x78}, // n
-	{0x00,0x7c,0x44,0x7c}, // o
+	{0x00,0x78,0x48,0x78}, // o
 	{0x00,0x7c,0x14,0x08}, // p
 	{0x00,0x08,0x14,0x7c}, // q
 	{0x00,0x7c,0x04,0x08}, // r
 	{0x00,0x58,0x54,0x34}, // s
 	{0x00,0x08,0x7c,0x08}, // t
-	{0x00,0x7c,0x40,0x7c}, // u
+	{0x00,0x78,0x40,0x78}, // u
 	{0x00,0x3c,0x40,0x3c}, // v
 	{0x00,0x7c,0x60,0x7c}, // w
 	{0x00,0x6c,0x10,0x6c}, // x
@@ -146,32 +149,29 @@ static constexpr unsigned char MoonBench4x8MONO[96][4] = {
     static constexpr uint8_t SSD1306_ADDRESS = 0x3C;
     static constexpr uint8_t SCREEN_WIDTH = 128;
     static constexpr uint8_t SCREEN_HEIGHT = 64;
-    static constexpr uint8_t BAUDRATE = 4000000;
+    static constexpr uint8_t BAUDRATE = 10000000;
 
 	static constexpr uint8_t FONT_WIDTH = 4;
 	static constexpr uint8_t FONT_HEIGHT = 8;
 
     i2c_inst_t *i2c;
-    uint8_t text_x = 0;
-	uint8_t text_y = 0;
-
-	static constexpr int BUFFER_SIZE = FONT_HEIGHT * SCREEN_WIDTH + 1;
-	uint8_t buffer[BUFFER_SIZE] = {0};
+    uint8_t write_x = 0;
+	uint8_t write_y = 0;
 
     ~SSD1306();
 
-	int i2c_write(uint8_t* buffer, const int length);
+	int i2c_write(const uint8_t* buffer, const int length);
     int send_command(uint8_t command);
-	int send_data(uint8_t data);
 
 	int set_write_position(uint8_t x, uint8_t y);
-	void print_append_blanks(bool invert = false);
+	void fill_blank(size_t size);
+	static void fill_font_data(char character, uint8_t *buffer, int &index, bool invert);
 public:
     void operator=(const SSD1306 &) = delete;
     SSD1306(const SSD1306 &copy) = delete;
     SSD1306(const uint sda, const uint scl, i2c_inst_t *instance_i2c);
 
-	static constexpr int MAX_CHARACTER_PER_ROW = SCREEN_WIDTH / (FONT_WIDTH);
+	static constexpr int MAX_CHARACTER_PER_LINE = SCREEN_WIDTH / (FONT_WIDTH);
 	static constexpr int MAX_ROW = SCREEN_HEIGHT / (FONT_HEIGHT);
 
 	int set_contrast(uint8_t value);
@@ -184,7 +184,7 @@ public:
 	void draw_char(char character, bool invert = false);
 
 	void print_append(const char *text, bool invert = false);
-	void print_overwrite(const char *text, bool invert = false);
+	void print_overwrite(const char *text, bool invert = false, uint8_t start_x = 0, uint8_t start_y = 0);
 	void print_line(const char *text, uint8_t line, bool invert = false);
 };
 

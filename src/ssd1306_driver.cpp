@@ -15,84 +15,78 @@ using namespace std;
 
 void SSD1306::clear_screen()
 {
+	write_x = 0;
+	write_y = 0;
 	set_write_position(0, 0);
 	
-	for (int index = 0; index < BUFFER_SIZE; index++)
-	{
-		buffer[index] = 0;
-	}
+	static constexpr int BUFFER_SIZE = SCREEN_WIDTH*MAX_ROW+1;
+	static constexpr uint8_t BUFFER[BUFFER_SIZE] = {CONTROL_DATA};
+	i2c_write(BUFFER, BUFFER_SIZE);
+	
+	set_write_position(0, 0);
 }
 
-// Fill the rest of the line with blank character.
-void SSD1306::print_append_blanks(bool invert)
+void SSD1306::fill_font_data(char character, uint8_t *buffer, int &index, bool invert)
 {
-	while (text_x < SCREEN_WIDTH)
+	int idx = character - 32;
+	for (int i = 0; i < FONT_WIDTH; i++)
 	{
-		draw_char(' ', invert);
-	}
-	text_x = 0;
-	text_y += FONT_HEIGHT;
-}
-
-// Minimize i2c write.
-void SSD1306::clear_text()
-{
-	uint8_t end_x = text_x / (FONT_WIDTH);
-	uint8_t end_y = text_y / (FONT_HEIGHT);
-	text_x = 0;
-	text_y = 0;
-
-	for (uint8_t y = 0; y < end_y; y++)
-	{
-		print_append_blanks();
-	}
-	print_append_blanks();
-
-	text_x = 0;
-	text_y = 0;
-}
-
-void SSD1306::draw_char(char character,  bool invert)
-{
-	if (character == '\n')
-	{
-		print_append_blanks();
-		return;
-	}
-
-	for (uint8_t index = 0; index < FONT_WIDTH; index++)
-	{
-		set_write_position(text_x++, text_y);
-
-		uint8_t line = MoonBench4x8MONO[character-32][index];
+		uint8_t line = MoonBench4x8MONO[idx][i];
 		if (invert)
 		{
 			line = 0xff - line;
 		}
-		send_data(line);
+		buffer[index++] = line;
 	}
 }
 
-int SSD1306::send_data(uint8_t data)
+void SSD1306::fill_blank(size_t size)
 {
+	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
+	
+	i2c_write(buffer, size);
+	delete[] buffer;
+}
+
+// Less i2c write than clear_screen().
+void SSD1306::clear_text()
+{
+	set_write_position(0, 0);
+	fill_blank(write_y / FONT_HEIGHT * SCREEN_WIDTH + write_x + 1);
+
+	write_x = 0;
+	write_y = 0;
+	set_write_position(0, 0);
+}
+
+// Draw a single char at position.
+void SSD1306::draw_char(char character, bool invert)
+{
+	size_t size = FONT_WIDTH+1;
+	uint8_t buffer[size];
 	buffer[0] = CONTROL_DATA;
-	buffer[1] = data;
-	return i2c_write(buffer, 2);
+
+	int index = 1;
+	fill_font_data(character, buffer, index, invert);
+
+	i2c_write(buffer, size);
+	write_x += FONT_WIDTH;
 }
 
 void SSD1306::set_char_pos(uint8_t column, uint8_t line)
 {
-	text_x = column * (FONT_WIDTH);
-	text_y = line * (FONT_HEIGHT);
+	write_x = column * (FONT_WIDTH);
+	write_y = line * (FONT_HEIGHT);
 
-	if (text_x >= SCREEN_WIDTH)
+	if (write_x >= SCREEN_WIDTH)
 	{
-		text_x = 0;
+		write_x = 0;
 	}
-	if (text_y >= SCREEN_HEIGHT)
+	if (write_y >= SCREEN_HEIGHT)
 	{
-		text_y = 0;
+		write_y = 0;
 	}
+	set_write_position(write_x, write_y);
 }
 
 int SSD1306::set_contrast(uint8_t value)
@@ -108,7 +102,7 @@ int SSD1306::set_write_position(uint8_t x, uint8_t y)
 	return send_command(0xB0 + (y / FONT_HEIGHT));  /* row address */
 }
 
-int SSD1306::i2c_write(uint8_t* buffer, int length)
+int SSD1306::i2c_write(const uint8_t* buffer, int length)
 {
 	return i2c_write_blocking(i2c, SSD1306_ADDRESS, buffer, length, false);
 }
@@ -124,52 +118,99 @@ int SSD1306::send_command(uint8_t command)
 void SSD1306::print_line(const char *text, uint8_t line, bool invert)
 {
 	set_char_pos(0, line);
-	for (int column = 0; column < MAX_CHARACTER_PER_ROW || *text; column++)
+
+	size_t size = SCREEN_WIDTH + 1;
+	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
+
+	int index = 1;
+	while (index < size || *text)
 	{
-		draw_char(*text, invert);
+		fill_font_data(*text, buffer, index, invert);
 		++text;
 	}
-	print_append_blanks(invert);
+	
+	if (invert)
+	{
+		fill(buffer + index, buffer + size, 0xff);
+	}
+	
+	i2c_write(buffer, size);
+	delete[] buffer;
 }
 
 // Overwrite on screen text. Less i2c write than clear_text() then print_append()
-void SSD1306::print_overwrite(const char *text, bool invert)
+void SSD1306::print_overwrite(const char *text, bool invert, uint8_t start_x, uint8_t start_y)
 {
-	int end_x = text_x;
-	int end_y = text_y;
-	text_x = 0;
-	text_y = 0;
+	int end_x = write_x;
+	int end_y = write_y;
+	write_x = start_x;
+	write_y = start_y;
+	set_write_position(start_x, start_y);
 
 	print_append(text, invert);
 
-	end_y -= static_cast<int>(text_y);
-	end_x -= static_cast<int>(text_x);
-	if (end_y < 0 || (end_y == 0 && end_x <= 0))
+	end_y -= static_cast<int>(write_y);
+	if (end_y < 0)
 	{
 		return;
 	}
 
-	end_y /= (FONT_HEIGHT);
-	uint8_t current_pos_x = text_x;
-	uint8_t current_pos_y = text_y;
-
-	print_append_blanks();
-	for (int index = 0; index < end_y; index++)
+	end_y = end_y / FONT_HEIGHT -1;
+	size_t size = SCREEN_WIDTH - write_x + 1; // First line.
+	if (end_y > -1)
 	{
-		print_append_blanks();
+		size += end_x; // Last line.
+		if (end_y > 0)
+		{
+			// Anything in between.
+			size += end_y * SCREEN_WIDTH;
+		}
 	}
+	fill_blank(size);
 
-	text_x = current_pos_x;
-	text_y = current_pos_y;
+	set_write_position(write_x, write_y);
 }
 
 void SSD1306::print_append(const char *text, bool invert)
 {
-	while (*text != 0)
+	const char *begin = text;
+	int count_line = 0;
+	write_x = 0;
+	while (*text)
 	{
-		draw_char(*text, invert);
+		if (*text == '\n')
+		{
+			++count_line;
+			write_x = 0;
+		}
+		++text;
+		++write_x;
+	}
+
+	text = begin;
+	write_x *= FONT_WIDTH;
+	write_y += count_line * FONT_HEIGHT;
+	size_t size = write_x + count_line * SCREEN_WIDTH + 1;
+	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
+
+	int index = 1;
+	count_line = 1;
+	while (*text)
+	{
+		if (*text == '\n')
+		{
+			count_line += SCREEN_WIDTH;
+			index = count_line;
+			++text;
+			continue;
+		}
+
+		fill_font_data(*text, buffer, index, invert);
 		++text;
 	}
+
+	i2c_write(buffer, size);
+	delete[] buffer;
 }
 
 SSD1306::SSD1306(uint sda, uint scl, i2c_inst_t *instance_i2c)

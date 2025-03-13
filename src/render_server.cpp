@@ -66,12 +66,12 @@ void RenderServer::clear_screen()
 // Return discard position.
 void RenderServer::text_wrap(string &text)
 {
-    if (text.length() <= SSD1306::MAX_CHARACTER_PER_ROW)
+    if (text.length() <= SSD1306::MAX_CHARACTER_PER_LINE)
     {
         return;
     }
 
-    int row = ceil(static_cast<float>(text.length() / SSD1306::MAX_CHARACTER_PER_ROW));
+    int row = ceil(static_cast<float>(text.length() / SSD1306::MAX_CHARACTER_PER_LINE));
     if (row > SSD1306::MAX_ROW*2)
     {
         row = SSD1306::MAX_ROW*2;
@@ -80,7 +80,7 @@ void RenderServer::text_wrap(string &text)
     int index = 0;
     for (int index_row = 1; index_row <= row; index_row++)
     {
-        index += SSD1306::MAX_CHARACTER_PER_ROW;
+        index += SSD1306::MAX_CHARACTER_PER_LINE;
         char character = text.at(index);
 
         if (isblank(character) || character == ':' || character == '.' || character == ',' || character == ';')
