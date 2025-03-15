@@ -26,7 +26,7 @@ for path in os.listdir():
         #### Convert to C-header format
         file = open(OUTPUT_H, 'w')
         num_chars = len(FONTSTR)
-        file.write('static constexpr int ')
+        file.write('static constexpr unsigned char ')
         file.write(FONT_NAME)
         file.write("_WIDTH = ")
         file.write(str(CHAR_WIDTH))

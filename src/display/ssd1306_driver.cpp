@@ -12,14 +12,61 @@ SSD1306::~SSD1306() {}
 
 using namespace std;
 
-void SSD1306::clear_screen()
+int SSD1306::clear_screen()
 {
 	set_write_position(0, 0);
 	
 	static constexpr uint8_t buffer[MAX_BUFFER_SIZE] = {CONTROL_DATA};
-	i2c_write(buffer, MAX_BUFFER_SIZE);
-	
-	set_write_position(0, 0);
+	return i2c_write(buffer, MAX_BUFFER_SIZE);	
+}
+
+int SSD1306::draw_image_fullscreen(const uint8_t *data, int width, int pages, bool invert)
+{
+	uint8_t *buffer = new uint8_t[MAX_BUFFER_SIZE] {CONTROL_DATA};
+	int offset = (SCREEN_WIDTH - width) / 2;
+
+	if (!offset)
+	{
+		size_t size = width * pages;
+		if (invert)
+		{
+			for (int index = 0; index < size; index++)
+			{
+				buffer[index+1] = 0xff - data[index];
+			}
+		}
+		else
+		{
+			memcpy(buffer + 1, data, size);
+		}
+		int error = i2c_write(buffer, MAX_BUFFER_SIZE);
+		delete[] buffer;
+		return error;
+	}
+
+	uint8_t *begin = buffer;
+	offset += 1;
+	for (int page = 1; page <= pages; page++)
+	{
+		if (invert)
+		{
+			uint8_t *end = buffer + SCREEN_WIDTH;
+			buffer += offset;
+			for (int index = 0; index < width; index++)
+			{
+				*buffer = 0xff - *data;
+			}
+			data += width;
+			buffer = end;
+			continue;
+		}
+		memcpy(buffer + offset, data, width);
+		data += width;
+		buffer += SCREEN_WIDTH;
+	}
+	int error = i2c_write(begin, MAX_BUFFER_SIZE);
+	delete[] begin;
+	return error;
 }
 
 int SSD1306::print_text(const char *text, size_t size, bool invert)
@@ -41,28 +88,29 @@ int SSD1306::print_text(const char *text, size_t size, bool invert)
 			++text;
 			continue;
 		}
-		if (!isprint(*text))
+
+		int character = *text - 32;
+		++text;
+		if (character < 0)
 		{
-			++text;
 			continue;
 		}
 
-		uint8_t character = *text - 32;
-		for (int i = 0; i < MoonBench4x8_WIDTH; i++)
+		if (invert)
 		{
-			uint8_t line = MoonBench4x8[character][i];
-			if (invert)
+			for (int i = 0; i < MoonBench4x8_WIDTH; i++)
 			{
-				line = 0xff - line;
+				buffer[index++] = 0xff - MoonBench4x8[character][i];
 			}
-			buffer[index++] = line;
+			continue;
 		}
-		++text;
+		memcpy(buffer + index, MoonBench4x8[character], MoonBench4x8_WIDTH);
+		index += MoonBench4x8_WIDTH;
 	}
 
-	int err = i2c_write(buffer, size);
+	int error = i2c_write(buffer, size);
 	delete[] buffer;
-	return err;
+	return error;
 }
 
 int SSD1306::set_char_pos(uint8_t column, uint8_t line)
@@ -83,7 +131,12 @@ int SSD1306::set_char_pos(uint8_t column, uint8_t line)
 
 int SSD1306::set_contrast(uint8_t value)
 {
-	uint8_t buffer[3] = {CONTROL_COMMAND, SET_CONTRAST, value};
+	uint8_t buffer[3] = 
+	{
+		CONTROL_COMMAND,
+		SET_CONTRAST,
+		value,
+	};
 	return i2c_write(buffer, 3);
 }
 

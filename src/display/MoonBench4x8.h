@@ -1,4 +1,4 @@
-static constexpr int MoonBench4x8_WIDTH = 4;
+static constexpr unsigned char MoonBench4x8_WIDTH = 4;
 static constexpr unsigned char MoonBench4x8[96][4] = 
 {
 	{0x00,0x00,0x00,0x00}, //  

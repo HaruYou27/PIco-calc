@@ -8,29 +8,39 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 from PIL import Image
 import os
+import numpy
+import math
 
 os.makedirs("output", exist_ok=True)
 
 for path in os.listdir():
     if path.endswith(".png"):
+        print(path)
         image = Image.open(path)
-        print("\n"
-              "static constexpr int {name}_width  {w}\n"
-              "static constexpr int {name}_height {h}\n"
-              "\n"
-              "static constexpr uint8_t {name}_data[] = {{\n"
-              .format(name=path.replace(".png", ""), w=image.width, h=image.height), end='')
-        for y in range(0, image.height):
-          for x in range(0, (image.width + 7)//8 * 8):
-            if x == 0:
-              print("  ", end='')
-            if x % 8 == 0:
-              print("0b", end='')  
-            bit = '0'
-            if x < image.width and image.getpixel((x,y)) != 0:
-              bit = '1'
-            print(bit, end='')   
-            if x % 8 == 7:
-              print(",", end='')
-          print()
-        print("};")
+        path = path.replace("*.png", ".h")
+        file = open(os.path.join("output", path))
+        width = image.width
+        height = image.height
+        page = math.ceil(height / 8)
+        file.write("static constexpr unsigned char {name}_WIDTH = {w};\nstatic constexpr unsigned char {name}_PAGE = {h};\nstatic constexpr unsigned char {name}_data[][] =\n".format(name=path.replace(".h", ""), w=width, h=page))
+        img_array = numpy.array(image, dtype=numpy.uint8)
+        c_array = []
+
+        c_array_str = "{"
+        # Iterate over the image in 8-pixel vertical chunks
+        for y in range(0, page, 8):
+
+            for x in range(width):
+                # Extract 8 vertical pixels
+                byte = 0
+                for i in range(8):
+                    if y + i < height:
+                        pixel = img_array[y + i, x]
+                        byte |= (pixel & 0x01) << (7 - i)
+                c_array.append(byte)
+        c_array_str = "{\n"
+        for i, byte in enumerate(c_array):
+            c_array_str += f"0x{byte:02X}, "
+        c_array_str = c_array_str + "};"
+        file.write(c_array_str)
+        file.close()
