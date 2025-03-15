@@ -29,32 +29,20 @@ void RenderServer::print_menu(const char *title, const char *menu[])
     screen0->print_line(title, 0, true);
     screen0->print_line(menu[0], 1, true);
 
-    uint8_t index = 1;
-    while (menu[index] != NULL || index < 19)
+    for (int index = 2; menu[index] != NULL || index < SSD1306::ROW_COUNT*2; index++)
     {
-        if (index > 8)
-        {
-            screen1->print_line(menu[index], ++index);
-            continue;
-        }
-        screen0->print_line(menu[index], ++index);
+        print_line(menu[index-1], index);
     }
 }
 
 void RenderServer::print_line(const char *text, uint8_t line, bool invert)
 {
-    if (line > 9)
+    if (line > SSD1306::ROW_COUNT)
     {
         screen1->print_line(text, line, invert);
         return;
     }
     screen0->print_line(text, line, invert);
-}
-
-void RenderServer::clear_text()
-{
-    screen0->clear_text();
-    screen1->clear_text();
 }
 
 void RenderServer::clear_screen()
@@ -66,21 +54,21 @@ void RenderServer::clear_screen()
 // Return discard position.
 void RenderServer::text_wrap(string &text)
 {
-    if (text.length() <= SSD1306::MAX_CHARACTER_PER_LINE)
+    if (text.length() <= SSD1306::CHAR_PER_LINE)
     {
         return;
     }
 
-    int row = ceil(static_cast<float>(text.length() / SSD1306::MAX_CHARACTER_PER_LINE));
-    if (row > SSD1306::MAX_ROW*2)
+    int row = ceil(static_cast<float>(text.length() / SSD1306::CHAR_PER_LINE));
+    if (row > SSD1306::ROW_COUNT*2)
     {
-        row = SSD1306::MAX_ROW*2;
+        row = SSD1306::ROW_COUNT*2;
     }
 
     int index = 0;
     for (int index_row = 1; index_row <= row; index_row++)
     {
-        index += SSD1306::MAX_CHARACTER_PER_LINE;
+        index += SSD1306::CHAR_PER_LINE;
         char character = text.at(index);
 
         if (isblank(character) || character == ':' || character == '.' || character == ',' || character == ';')

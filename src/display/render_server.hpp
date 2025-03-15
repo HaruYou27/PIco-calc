@@ -19,6 +19,7 @@ class RenderServer
 {
 private:
     static RenderServer *singleton;
+    static constexpr int ROW_COUNT = 8;
     
     RenderServer();
 
@@ -31,7 +32,6 @@ public:
     static SSD1306 *screen0;
     static SSD1306 *screen1;
     
-    void clear_text();
     void clear_screen();
     void print_overwrite();
 

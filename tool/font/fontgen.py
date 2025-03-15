@@ -7,40 +7,51 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."""
 
 from PIL import Image
-import os.path
+import os
 
-img = Image.open(r"moonbench4x8.png")
-OUTPUT_H = "output/moonbench4x8.h"
-FONT_NAME = "MoonBench4x8MONO"
+os.makedirs("output", exist_ok=True)
 FONTSTR = """ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
 CHAR_WIDTH = 4
 CHAR_HEIGHT = 8
-GLYPH_WIDTH = CHAR_WIDTH
 
-#### Convert to C-header format
-f = open(OUTPUT_H, 'w')
-num_chars = len(FONTSTR)
-f.write('static constexpr unsigned char ')
-f.write(FONT_NAME)
-f.write('[%d][%d] = {\n' % (num_chars+1, CHAR_WIDTH))
+for path in os.listdir():
+    if path.endswith(".png"):
+        img = Image.open(path)
 
-chars = []
-for i in range(num_chars):
-    ints = []
-    for j in range(CHAR_WIDTH):
-        x = i*GLYPH_WIDTH + j
-        val = 0
-        for y in range(CHAR_HEIGHT):
-            rgb = img.getpixel((x,y))
-            val = (val >> 1) | (0x80 if rgb[0] == 0 else 0)
+        FONT_NAME = path.replace(".png", '')
 
-        ints.append('0x%.2x' % (val))
-    c = FONTSTR[i]
-    if c == '\\': c = '"\\"' # bugfix
-    f.write('\t{%s}, // %s\n' % (','.join(ints), c))
+        path = path.replace(".png", ".h")
+        OUTPUT_H = os.path.join("output/", path)
+
+        #### Convert to C-header format
+        file = open(OUTPUT_H, 'w')
+        num_chars = len(FONTSTR)
+        file.write('static constexpr int ')
+        file.write(FONT_NAME)
+        file.write("_WIDTH = ")
+        file.write(str(CHAR_WIDTH))
+        file.write(";\n")
+        file.write('static constexpr unsigned char ')
+        file.write(FONT_NAME)
+        file.write('[%d][%d] = \n{\n' % (num_chars+1, CHAR_WIDTH))
+
+        chars = []
+        for i in range(num_chars):
+            ints = []
+            for j in range(CHAR_WIDTH):
+                x = i*CHAR_WIDTH + j
+                val = 0
+                for y in range(CHAR_HEIGHT):
+                    rgb = img.getpixel((x,y))
+                    val = (val >> 1) | (0x80 if rgb[0] == 0 else 0)
+
+                ints.append('0x%.2x' % (val))
+            c = FONTSTR[i]
+            if c == '\\': c = '"\\"' # bugfix
+            file.write('\t{%s}, // %s\n' % (','.join(ints), c))
 
 
-f.write('\t{%s}\n' % (','.join(['0x00']*CHAR_WIDTH)))
-f.write('};')
+        file.write('\t{%s}\n' % (','.join(['0x00']*CHAR_WIDTH)))
+        file.write('};')
 
-f.close()
+        file.close()

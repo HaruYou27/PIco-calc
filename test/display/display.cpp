@@ -15,7 +15,7 @@ int main()
     gpio_put(25, true);
 
     SSD1306 *oled = new SSD1306(16, 17, i2c0);
-    static constexpr uint32_t DELAY = 3000;
+    static constexpr uint32_t DELAY = 5000;
 
     bool tick = true;
     while (true)
