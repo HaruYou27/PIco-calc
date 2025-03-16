@@ -19,7 +19,4 @@ CMakeUserPresets.json
 # Built Visual Studio Code Extensions
 *.vsix
 
-tool/textwrap/*.txt
 **/build/
-**/output/
-*.mpy

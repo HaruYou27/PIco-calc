@@ -16,7 +16,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #include <ctype.h>
 #include <string.h>
 
-#include "MoonBench4x8.h"
+#include "font/output/MoonBench4x8.h"
 
 class SSD1306
 {
