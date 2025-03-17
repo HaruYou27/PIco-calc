@@ -1,6 +1,6 @@
 """Copyright 2025 - HaruYou27
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation paths (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
@@ -10,29 +10,37 @@ import os
 import textwrap
 import unicodedata
 
-os.makedirs("output", exist_ok=True)
-
-for path in os.listdir():
+paths = []
+for path in os.listdir("input"):
     if path.endswith(".txt"):
-        print(path)
-        file = open(path)
-        text = file.read()
-        file.close()
+        paths.append(path)
+paths.sort()
 
-        text = unicodedata.normalize("NFKD", text)
-        # Filter out diacritics and keep only ASCII characters
-        text_ascii = "".join(char for char in text if not unicodedata.combining(char))
+file_output = open(os.path.join("book.h", path), "w")
+file_output.write("static constexpr char *BOOK_DATA[] =\n{\n")
+names = []
+for path in paths:
+    print(path)
+    file = open(path)
+    text = file.read()
+    file.close()
 
-        text = text_ascii
-        text = textwrap.fill(text, 32, replace_whitespace=False)
-        text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+    names.append(textwrap.shorten(path.replace(".txt", ""), 32, placeholder=""))
 
-        name = path.replace(".txt", "")
-        name = textwrap.shorten(name, 32, placeholder="")
-        path = path.replace(".txt", ".h")
-        text = f'static constexpr unsigned char {name}[] = "{text}";'
+    text = unicodedata.normalize("NFKD", text)
+    # Filter out diacritics and keep only ASCII characters
+    text_ascii = "".join(char for char in text if not unicodedata.combining(char))
+    text = text_ascii
+    text = textwrap.fill(text, 32, replace_whitespace=False)
+    text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
 
-        file_output = open(os.path.join("output/", path), "w")
-        file_output.write(text)
-        file_output.close()
+    file_output.write('"' + text + '",\n')
+file_output.write("\n};")
+
+file_output.write("static constexpr char *BOOK_TITLE[] =\n{\n")
+for name in names:
+    file_output.write('"' + name + '",\n')
+file_output.write("NULL\n};")
+
+file_output.close()
 

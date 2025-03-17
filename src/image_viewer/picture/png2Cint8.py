@@ -11,22 +11,23 @@ import os
 import numpy
 import math
 
-os.makedirs("output", exist_ok=True)
+files = []
 
-for path in os.listdir():
+for path in os.listdir("input"):
     if path.endswith(".png"):
-        print(path)
+        
         image = Image.open(path)
+        img_array = numpy.array(image, dtype=numpy.uint8)
+
+
         path = path.replace(".png", ".h")
         file = open(os.path.join("output", path), "w")
         width = image.width
         height = image.height
         page = math.ceil(height / 8)
-        file.write("static constexpr unsigned char {name}_WIDTH = {w};\nstatic constexpr unsigned char {name}_PAGE = {h};\nstatic constexpr unsigned char {name}_data[] =\n".format(name=path.replace(".h", ""), w=width, h=page))
-        img_array = numpy.array(image, dtype=numpy.uint8)
-        c_array = []
+        file.write("static constexpr unsigned char {name}_WIDTH = {w};\nstatic constexpr unsigned char {name}_PAGE = {h};\nstatic constexpr unsigned char {name}_data[] = ".format(name=path.replace(".h", ""), w=width, h=page))
 
-        c_array_str = "{\n"
+        c_array_str = "{"
         # Iterate over the image in 8-pixel vertical chunks
         for y in range(0, height, 8):
             for x in range(width):

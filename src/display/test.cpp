@@ -8,9 +8,6 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 #include "ssd1306_driver.hpp"
 
-#include "whattodo.h"
-#include "discover.h"
-
 int main()
 {
     gpio_init(25);
@@ -34,6 +31,5 @@ int main()
         sleep_ms(DELAY);
         oled->print_overwrite("Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit, sed\ndo eiusmod tempor incididunt ut\nlabore et dolore magna aliqua.\nUt enim ad minim veniam, quis\nnostrud exercitation ullamco\nlaboris nisi ut aliquip ex ea\ncommodo consequat. Duis aute", tick);
         sleep_ms(DELAY);
-        oled->draw_image_fullscreen(whattodo_data)
     }
 }
