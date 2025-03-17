@@ -8,11 +8,12 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 from PIL import Image
 import os
+import sys
 
-os.makedirs("output", exist_ok=True)
 FONTSTR = """ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
 CHAR_WIDTH = 4
 CHAR_HEIGHT = 8
+
 
 for path in os.listdir():
     if path.endswith(".png"):
@@ -23,7 +24,6 @@ for path in os.listdir():
         path = path.replace(".png", ".h")
         OUTPUT_H = os.path.join("output/", path)
 
-        #### Convert to C-header format
         file = open(OUTPUT_H, 'w')
         num_chars = len(FONTSTR)
         file.write('static constexpr unsigned char ')

@@ -16,7 +16,6 @@ int main()
 
     SSD1306 *oled = new SSD1306(16, 17, i2c0);
     static constexpr uint32_t DELAY = 5000;
-
     bool tick = true;
     while (true)
     {

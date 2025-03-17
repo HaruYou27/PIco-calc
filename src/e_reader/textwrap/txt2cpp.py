@@ -10,36 +10,33 @@ import os
 import textwrap
 import unicodedata
 
-paths = []
-for path in os.listdir("input"):
-    if path.endswith(".txt"):
-        paths.append(path)
-paths.sort()
-
-file_output = open(os.path.join("book.h", path), "w")
+file_output = open("book.h", "w")
 file_output.write("static constexpr char *BOOK_DATA[] =\n{\n")
-names = []
-for path in paths:
-    print(path)
-    file = open(path)
-    text = file.read()
-    file.close()
 
-    names.append(textwrap.shorten(path.replace(".txt", ""), 32, placeholder=""))
+titles = []
+os.chdir("input")
+for path in os.listdir():
+    if path.endswith(".txt"):
+        print(path)
+        file = open(path)
+        text = file.read()
+        file.close()
 
-    text = unicodedata.normalize("NFKD", text)
-    # Filter out diacritics and keep only ASCII characters
-    text_ascii = "".join(char for char in text if not unicodedata.combining(char))
-    text = text_ascii
-    text = textwrap.fill(text, 32, replace_whitespace=False)
-    text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+        titles.append(textwrap.shorten(path.replace(".txt", ""), 32, placeholder=""))
 
-    file_output.write('"' + text + '",\n')
+        text = unicodedata.normalize("NFKD", text)
+        # Filter out diacritics and keep only ASCII characters
+        text_ascii = "".join(char for char in text if not unicodedata.combining(char))
+        text = text_ascii
+        text = textwrap.fill(text, 32, replace_whitespace=False)
+        text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+
+        file_output.write('    "' + text + '",\n')
 file_output.write("\n};")
 
 file_output.write("static constexpr char *BOOK_TITLE[] =\n{\n")
-for name in names:
-    file_output.write('"' + name + '",\n')
+for title in titles:
+    file_output.write('"' + title + '",\n')
 file_output.write("NULL\n};")
 
 file_output.close()
