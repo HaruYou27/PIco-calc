@@ -12,9 +12,9 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-#include <algorithm>
 #include <ctype.h>
 #include <string.h>
+#include <algorithm>
 
 #include "font/MoonBench5x8Variable.h"
 
@@ -54,7 +54,7 @@ private:
 		SWITCHCAPVCC = 0x2,
 		NOP = 0xE3,
 	};
-	enum SPEC
+	enum SPECIFICATION
 	{
 		SLAVE_ADDRESS = 0x3C,
 		SCREEN_WIDTH = 128,
@@ -83,7 +83,7 @@ public:
 	int i2c_write(const uint8_t* buffer, const int length);
 
 	int print_overwrite(const char *text, bool invert = false);
-	int print_line(const char *text, uint8_t line, bool invert = false);
+	int print_line(const char *text, int line, bool invert = false);
 
 	int draw_image_fullscreen(const uint8_t *data, int width, int page, bool invert = false);
 };

@@ -10,6 +10,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #define E_READER_HPP
 
 #include "application.hpp"
+#include "book.h"
 
 class eReader : Application
 {

@@ -33,10 +33,9 @@ public:
     static SSD1306 *screen1;
     
     void clear_screen();
-    void print_overwrite();
 
-    void print_menu(const char *title, const char *menu[]);
-    void print_line(const char *text, uint8_t line, bool invert = false);
+    void print_menu(const char* const *menu, int size);
+    int print_line(const char *text, uint8_t line, bool invert = false);
 
     static void text_wrap(std::string &text);
 };

@@ -112,9 +112,9 @@ int SSD1306::print_text(const char *text, size_t size, bool invert)
 				index = index_page;
 				break;
 			case ' ':
-				uint8_t *begin = buffer + index;
 				if (invert)
 				{
+					uint8_t *begin = buffer + index;
 					fill(begin, begin + 2, 0xff);
 				}
 				index += 2;
@@ -133,7 +133,7 @@ int SSD1306::print_text(const char *text, size_t size, bool invert)
 			continue;
 		}
 		const uint8_t *font_data = MoonBench5x8Variable[character];
-		size_t font_width = strlen((char*) font_data);
+		size_t font_width = strnlen((char*) font_data, MoonBench5x8Variable_width);
 
 		if (invert)
 		{
@@ -181,16 +181,10 @@ int SSD1306::i2c_write(const uint8_t* buffer, int length)
 	return i2c_write_blocking(i2c, SLAVE_ADDRESS, buffer, length, false);
 }
 
-// Print and overwrite a single line.
-int SSD1306::print_line(const char *text, uint8_t line, bool invert)
+// Print and overwrite a specific line.
+int SSD1306::print_line(const char *text, int line, bool invert)
 {
-	line *= PAGE_SIZE;
-
-	if (line >= SCREEN_HEIGHT)
-	{
-		line = 0;
-	}
-	set_write_position(0, line);
+	set_write_position(0, min(PAGE_SIZE*line, static_cast<int>(SCREEN_HEIGHT)));
 	return print_text(text, SCREEN_WIDTH + 1, invert);
 }
 

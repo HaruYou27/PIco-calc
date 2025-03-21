@@ -18,8 +18,9 @@ for path in os.listdir():
 
         num_chars = len(FONTSTR)
         font_width = img.width
+        name = path.replace(".png", "")
 
-        c_array = 'static constexpr unsigned char ' + path.replace(".png", "") + '[][{width}] ='.format(width=font_width) + "\n{"
+        c_array = 'static constexpr unsigned char ' + name + "_width = " + str(font_width) + ";\n" + 'static constexpr unsigned char ' + name + '[][{width}] ='.format(width=font_width) + "\n{"
         for y in range(0, img.height, 8):
             c_array += "\n    {"
             for x in range(font_width):
