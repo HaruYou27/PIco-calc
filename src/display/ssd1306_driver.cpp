@@ -16,8 +16,10 @@ int SSD1306::clear_screen()
 {
 	set_write_position(0, 0);
 	
-	static constexpr uint8_t buffer[MAX_BUFFER_SIZE] = {CONTROL_DATA};
-	return i2c_write(buffer, MAX_BUFFER_SIZE);	
+	uint8_t *buffer = new uint8_t[MAX_BUFFER_SIZE] {CONTROL_DATA};
+	int error = i2c_write(buffer, MAX_BUFFER_SIZE);
+	delete[] buffer;
+	return error;
 }
 
 int SSD1306::draw_image_fullscreen(const uint8_t *data, int width, int pages, bool invert)
@@ -71,6 +73,26 @@ int SSD1306::draw_image_fullscreen(const uint8_t *data, int width, int pages, bo
 	return error;
 }
 
+int SSD1306::display_on()
+{
+	static constexpr uint8_t buffer[2] =
+	{
+		CONTROL_COMMAND,
+		DISPLAY_ON
+	};
+	return i2c_write(buffer, 2);
+}
+
+int SSD1306::display_off()
+{
+	static constexpr uint8_t buffer[2] =
+	{
+		CONTROL_COMMAND,
+		DISPLAY_OFF
+	};
+	return i2c_write(buffer, 2);
+}
+
 int SSD1306::print_text(const char *text, size_t size, bool invert)
 {
 	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
@@ -79,56 +101,56 @@ int SSD1306::print_text(const char *text, size_t size, bool invert)
 	int index_page = 1;
 	while (*text && index < size)
 	{
-		if (*text == '\n')
+		switch (*text)
 		{
-			index_page += SCREEN_WIDTH;
-			if (invert)
-			{
-				fill(buffer + index, buffer + index_page, 0xff);
-			}
-			index = index_page;
+			case '\n':
+				index_page += SCREEN_WIDTH;
+				if (invert)
+				{
+					fill(buffer + index, buffer + index_page, 0xff);
+				}
+				index = index_page;
+				break;
+			case ' ':
+				uint8_t *begin = buffer + index;
+				if (invert)
+				{
+					fill(begin, begin + 2, 0xff);
+				}
+				index += 2;
+				break;
+		}
+		if (!isgraph(*text))
+		{
 			++text;
 			continue;
 		}
 
-		int character = *text - 32;
+		int character = *text - 33;
 		++text;
-		if (character < 0)
+		if (character < 0 || character > 93)
 		{
 			continue;
 		}
+		const uint8_t *font_data = MoonBench5x8Variable[character];
+		size_t font_width = strlen((char*) font_data);
 
 		if (invert)
 		{
-			for (int i = 0; i < MoonBench4x8_WIDTH; i++)
+			for (int i = 0; i < font_width; i++)
 			{
-				buffer[index++] = 0xff - MoonBench4x8[character][i];
+				buffer[index++] = 0xff - font_data[i];
 			}
+			buffer[index++] = 0xff;
 			continue;
 		}
-		memcpy(buffer + index, MoonBench4x8[character], MoonBench4x8_WIDTH);
-		index += MoonBench4x8_WIDTH;
+		memcpy(buffer + index, font_data, font_width);
+		index += font_width + 1;
 	}
 
 	int error = i2c_write(buffer, size);
 	delete[] buffer;
 	return error;
-}
-
-int SSD1306::set_char_pos(uint8_t column, uint8_t line)
-{
-	uint8_t x = column * MoonBench4x8_WIDTH;
-	uint8_t y = line * PAGE_SIZE;
-
-	if (x >= SCREEN_WIDTH)
-	{
-		x = 0;
-	}
-	if (y >= SCREEN_HEIGHT)
-	{
-		y = 0;
-	}
-	return set_write_position(x, y);
 }
 
 int SSD1306::set_contrast(uint8_t value)
@@ -162,7 +184,13 @@ int SSD1306::i2c_write(const uint8_t* buffer, int length)
 // Print and overwrite a single line.
 int SSD1306::print_line(const char *text, uint8_t line, bool invert)
 {
-	set_char_pos(0, line);
+	line *= PAGE_SIZE;
+
+	if (line >= SCREEN_HEIGHT)
+	{
+		line = 0;
+	}
+	set_write_position(0, line);
 	return print_text(text, SCREEN_WIDTH + 1, invert);
 }
 
@@ -205,7 +233,7 @@ SSD1306::SSD1306(uint sda, uint scl, i2c_inst_t *instance_i2c)
 		0x10,
 		0x40, // display start line = 0
 		0xB0, // page start = 0
-		DISPLAY_ON,
+		DISPLAY_ON
 	};
 	i2c_write(buffer, 30);
 }

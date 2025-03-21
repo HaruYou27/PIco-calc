@@ -32,12 +32,12 @@ for path in os.listdir():
         text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
 
         file_output.write('    "' + text + '",\n')
-file_output.write("\n};")
+file_output.write("\n};\n")
 
 file_output.write("static constexpr char *BOOK_TITLE[] =\n{\n")
 for title in titles:
-    file_output.write('"' + title + '",\n')
-file_output.write("NULL\n};")
+    file_output.write('    "' + title + '",\n')
+file_output.write("    nullptr\n};")
 
 file_output.close()
 
