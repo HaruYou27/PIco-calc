@@ -9,10 +9,11 @@ import numpy
 
 FONTSTR = """!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
 
+IN_PATH = "input/"
 for path in os.listdir():
     if path.endswith(".png"):
         print(path)
-        img = Image.open(path).convert('1')
+        img = Image.open(IN_PATH + path).convert('1')
         image = numpy.array(img, dtype=numpy.uint8)
         file = open(path.replace(".png", ".h"), 'w')
 

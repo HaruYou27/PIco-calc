@@ -13,31 +13,29 @@ import unicodedata
 file_output = open("book.h", "w")
 file_output.write("static constexpr const char *BOOK_DATA[] =\n{\n")
 
-titles = []
+paths = []
+titles = "static constexpr const char *BOOK_TITLE[] =\n{"
 os.chdir("input")
 for path in os.listdir():
     if path.endswith(".txt"):
-        print(path)
-        file = open(path)
-        text = file.read()
-        file.close()
+        paths.append(path)
+paths.sort()
 
-        titles.append(textwrap.shorten(path.replace(".txt", ""), 32, placeholder=""))
+for path in paths:
+    print(path)
+    titles += '\n    "' + textwrap.shorten(path.replace(".txt", ""), 32, placeholder="") + '",'
 
-        text = unicodedata.normalize("NFKD", text)
-        # Filter out diacritics and keep only ASCII characters
-        text_ascii = "".join(char for char in text if not unicodedata.combining(char))
-        text = text_ascii
-        text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+    file = open(path)
+    text = file.read()
+    file.close()
 
-        file_output.write('    "' + text + '",\n')
-file_output.write("\n};\n")
-
-name = "static constexpr const char *BOOK_TITLE[] =\n{"
-for title in titles:
-    name += '\n    "' + title + '",'
-name = name.strip(",") + "\n};\n"
-file_output.write(name)
+    text = unicodedata.normalize("NFKD", text)
+    # Filter out diacritics and keep only ASCII characters
+    text_ascii = "".join(char for char in text if not unicodedata.combining(char))
+    text = text_ascii
+    text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+    file_output.write('    "' + text + '",\n')
+file_output.write("\n};\n" + titles.strip(",") + "\n};\n")
 
 file_output.write("static constexpr unsigned char BOOKS = " + str(len(titles)) + ";")
 

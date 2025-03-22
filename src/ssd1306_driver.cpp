@@ -14,7 +14,7 @@ using namespace std;
 
 int SSD1306::clear_screen()
 {
-	set_write_position(0, 0);
+	set_page(0);
 	
 	uint8_t *buffer = new uint8_t[MAX_BUFFER_SIZE] {CONTROL_DATA};
 	int error = i2c_write(buffer, MAX_BUFFER_SIZE);
@@ -164,14 +164,14 @@ int SSD1306::set_contrast(uint8_t value)
 	return i2c_write(buffer, 3);
 }
 
-int SSD1306::set_write_position(uint8_t x, uint8_t y)
+int SSD1306::set_page(uint8_t page)
 {
 	uint8_t buffer[4] = 
 	{
 		CONTROL_COMMAND,
-		0x10 | static_cast<uint8_t>(x >> 4), // higher column address
-		x & 0x0F, // lower column address
-		0xB0 + (y / PAGE_SIZE), // row address
+		0x10 | 0, // higher column address
+		0 & 0x0F, // lower column address
+		0xB0 + page, // row address
 	};
 	return i2c_write(buffer, 4);
 }
@@ -182,16 +182,16 @@ int SSD1306::i2c_write(const uint8_t* buffer, int length)
 }
 
 // Print and overwrite a specific line.
-int SSD1306::print_line(const char *text, int line, bool invert)
+int SSD1306::print_line(const char *text, uint line, bool invert)
 {
-	set_write_position(0, min(PAGE_SIZE*line, static_cast<int>(SCREEN_HEIGHT)));
+	set_page(min(line, static_cast<uint>(PAGE_SIZE)));
 	return print_text(text, SCREEN_WIDTH + 1, invert);
 }
 
 // Clear the screen then print text.
 int SSD1306::print_overwrite(const char *text, bool invert)
 {
-	set_write_position(0, 0);
+	set_page(0);
 	return print_text(text, MAX_BUFFER_SIZE, invert);
 }
 

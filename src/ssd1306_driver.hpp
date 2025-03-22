@@ -16,7 +16,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #include <string.h>
 #include <algorithm>
 
-#include "font/MoonBench5x8Variable.h"
+#include "MoonBench5x8Variable.h"
 
 class SSD1306
 {
@@ -67,10 +67,10 @@ private:
 
     ~SSD1306();
 
-	int set_write_position(uint8_t x, uint8_t y);
+	int set_page(uint8_t page);
 	int print_text(const char *text, size_t size, bool invert);
 public:
-	static constexpr int ROW_COUNT = SCREEN_HEIGHT / PAGE_SIZE;
+	static constexpr uint ROW_COUNT = SCREEN_HEIGHT / PAGE_SIZE;
     void operator=(const SSD1306 &) = delete;
     SSD1306(const SSD1306 &copy) = delete;
     SSD1306(const uint sda, const uint scl, i2c_inst_t *instance_i2c);
@@ -83,7 +83,7 @@ public:
 	int i2c_write(const uint8_t* buffer, const int length);
 
 	int print_overwrite(const char *text, bool invert = false);
-	int print_line(const char *text, int line, bool invert = false);
+	int print_line(const char *text, uint line, bool invert = false);
 
 	int draw_image_fullscreen(const uint8_t *data, int width, int page, bool invert = false);
 };

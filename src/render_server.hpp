@@ -34,7 +34,7 @@ public:
     
     void clear_screen();
 
-    void print_menu(const char* const *menu, int size);
+    void print_menu(const char* const *menu, size_t size);
     int print_line(const char *text, uint8_t line, bool invert = false);
 
     static void text_wrap(std::string &text);

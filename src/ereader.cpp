@@ -8,7 +8,8 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 #include "ereader.hpp"
 
-int eReader::main()
+eReader::eReader()
 {
-    renderer->print_menu(BOOK_TITLE, BOOKS);
+    menu = BOOK_TITLE;
+    menu_size = BOOKS;
 }

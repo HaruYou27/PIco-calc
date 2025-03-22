@@ -10,11 +10,11 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #define E_READER_HPP
 
 #include "application.hpp"
-#include "book.h"
+#include "e_reader/book.h"
 
 class eReader : Application
 {
 public:
-    virtual int main() override;
+    eReader();
 };
 #endif

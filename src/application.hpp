@@ -15,17 +15,23 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 class Application
 {
 private:
-    uint8_t cursor = 0;
+    uint line = 0;
+    uint page = 0;
 protected:
-    RenderServer *renderer;
+    Application(size_t menu_size);
 
-    virtual void set_cursor(uint8_t value, const char *menu[]);
-    uint8_t get_cursor();
+    RenderServer *renderer;
+    InputMethodEditor *ime;
+
+    uint page2index();
+    uint line2index();
+
+    void set_line(uint8_t value, const char* const *menu);
+    uint8_t get_line();
+
+    uint open_menu(const char* const *menu, size_t menu_size);
 public:
     virtual int main();
-    
-    Application();
-    ~Application();
 };
 
 #endif

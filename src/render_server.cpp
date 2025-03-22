@@ -24,9 +24,10 @@ RenderServer *RenderServer::get_singleton()
     return singleton;
 }
 
-void RenderServer::print_menu(const char* const *menu, int size)
+void RenderServer::print_menu(const char* const *menu, size_t size)
 {
-    for (int index = 0; index < min(size, SSD1306::ROW_COUNT*2); index++)
+    print_line(menu[0], 0, true);
+    for (int index = 1; index < min(size, static_cast<size_t>(SSD1306::ROW_COUNT*2)); index++)
     {
         print_line(menu[index], index);
     }
@@ -34,6 +35,7 @@ void RenderServer::print_menu(const char* const *menu, int size)
 
 int RenderServer::print_line(const char *text, uint8_t line, bool invert)
 {
+    line = min(line, static_cast<uint8_t>(SSD1306::ROW_COUNT*2));
     if (line > SSD1306::ROW_COUNT)
     {
         return screen1->print_line(text, line, invert);
