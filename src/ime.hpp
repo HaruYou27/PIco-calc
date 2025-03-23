@@ -13,6 +13,8 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 #include "pico/stdlib.h"
 
+#include "render_server.hpp"
+
 class InputMethodEditor
 {
 private:
@@ -52,20 +54,20 @@ private:
     uint time_passed = 0;
 
     static InputMethodEditor *singleton;
+    static RenderServer *renderer;
 
     char scan_keys();
     char get_char();
 
     InputMethodEditor();    
-public:
     void operator=(const InputMethodEditor &) = delete;
     InputMethodEditor(const InputMethodEditor &copy) = delete;
+public:
     static InputMethodEditor *get_singleton();
 
     bool letter_mode = false;
     bool upper_case = false;
     bool raw = false;
-    bool can_sleep = false;
 
     char wait4input();
     void reset();

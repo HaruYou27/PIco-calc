@@ -54,6 +54,13 @@ private:
 		SWITCHCAPVCC = 0x2,
 		NOP = 0xE3,
 	};
+	
+    i2c_inst_t *i2c;
+
+    ~SSD1306();
+
+	int set_page(uint8_t page);
+public:
 	enum SPECIFICATION
 	{
 		SLAVE_ADDRESS = 0x3C,
@@ -63,13 +70,7 @@ private:
 		MAX_BUFFER_SIZE = SCREEN_WIDTH * SCREEN_HEIGHT / PAGE_SIZE + 1,
 		BAUDRATE = 100 * 1000,
 	};
-    i2c_inst_t *i2c;
-
-    ~SSD1306();
-
-	int set_page(uint8_t page);
-	int print_text(const char *text, size_t size, bool invert);
-public:
+	
 	static constexpr uint ROW_COUNT = SCREEN_HEIGHT / PAGE_SIZE;
     void operator=(const SSD1306 &) = delete;
     SSD1306(const SSD1306 &copy) = delete;
@@ -82,8 +83,8 @@ public:
 	int clear_screen();
 	int i2c_write(const uint8_t* buffer, const int length);
 
-	int print_overwrite(const char *text, bool invert = false);
 	int print_line(const char *text, uint line, bool invert = false);
+	int print_line(const char *text, const char *halt);
 
 	int draw_image_fullscreen(const uint8_t *data, int width, int page, bool invert = false);
 };

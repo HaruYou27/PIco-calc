@@ -93,33 +93,99 @@ int SSD1306::display_off()
 	return i2c_write(buffer, 2);
 }
 
-int SSD1306::print_text(const char *text, size_t size, bool invert)
+int SSD1306::set_contrast(uint8_t value)
 {
+	uint8_t buffer[3] = 
+	{
+		CONTROL_COMMAND,
+		SET_CONTRAST,
+		value,
+	};
+	return i2c_write(buffer, 3);
+}
+
+int SSD1306::set_page(uint8_t page)
+{
+	uint8_t buffer[4] = 
+	{
+		CONTROL_COMMAND,
+		0x10 | 0, // higher column address
+		0 & 0x0F, // lower column address
+		0xB0 + page, // row address
+	};
+	return i2c_write(buffer, 4);
+}
+
+int SSD1306::i2c_write(const uint8_t* buffer, int length)
+{
+	return i2c_write_blocking(i2c, SLAVE_ADDRESS, buffer, length, false);
+}
+
+// Print and overwrite next line.
+int SSD1306::print_line(const char *text, const char *halt)
+{
+	size_t size = SCREEN_WIDTH + 1;
+	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
+
+	int index = 1;
+	while (index < size && text < halt)
+	{
+		if (*text == ' ')
+		{
+			++text;
+			index += 2;
+			continue;
+		}
+		
+		if (!isgraph(*text))
+		{
+			++text;
+			continue;
+		}
+
+		int character = *text - 33;
+		++text;
+		if (character < 0 || character > 93)
+		{
+			continue;
+		}
+		const uint8_t *font_data = MoonBench5x8Variable[character];
+		size_t font_width = strnlen((char*) font_data, MoonBench5x8Variable_width);
+
+		memcpy(buffer + index, font_data, font_width);
+		index += font_width + 1;
+	}
+
+	int error = i2c_write(buffer, size);
+	delete[] buffer;
+	return error;
+}
+
+// Print and overwrite a specific line.
+int SSD1306::print_line(const char *text, uint line, bool invert)
+{
+	set_page(min(line, static_cast<uint>(PAGE_SIZE)));
+
+	size_t size = SCREEN_WIDTH + 1;
 	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
 
 	int index = 1;
 	int index_page = 1;
-	while (*text && index < size)
+	while (*text && index < size )
 	{
-		switch (*text)
+		if (*text == ' ')
 		{
-			case '\n':
-				index_page += SCREEN_WIDTH;
-				if (invert)
-				{
-					fill(buffer + index, buffer + index_page, 0xff);
-				}
-				index = index_page;
-				break;
-			case ' ':
-				if (invert)
-				{
-					uint8_t *begin = buffer + index;
-					fill(begin, begin + 2, 0xff);
-				}
-				index += 2;
-				break;
+			++text;
+			if (invert)
+			{
+				buffer[index++] = 0xff;
+				buffer[index++] = 0xff;
+				continue;
+			}
+			index += 2;
+			continue;
 		}
+		
 		if (!isgraph(*text))
 		{
 			++text;
@@ -151,48 +217,6 @@ int SSD1306::print_text(const char *text, size_t size, bool invert)
 	int error = i2c_write(buffer, size);
 	delete[] buffer;
 	return error;
-}
-
-int SSD1306::set_contrast(uint8_t value)
-{
-	uint8_t buffer[3] = 
-	{
-		CONTROL_COMMAND,
-		SET_CONTRAST,
-		value,
-	};
-	return i2c_write(buffer, 3);
-}
-
-int SSD1306::set_page(uint8_t page)
-{
-	uint8_t buffer[4] = 
-	{
-		CONTROL_COMMAND,
-		0x10 | 0, // higher column address
-		0 & 0x0F, // lower column address
-		0xB0 + page, // row address
-	};
-	return i2c_write(buffer, 4);
-}
-
-int SSD1306::i2c_write(const uint8_t* buffer, int length)
-{
-	return i2c_write_blocking(i2c, SLAVE_ADDRESS, buffer, length, false);
-}
-
-// Print and overwrite a specific line.
-int SSD1306::print_line(const char *text, uint line, bool invert)
-{
-	set_page(min(line, static_cast<uint>(PAGE_SIZE)));
-	return print_text(text, SCREEN_WIDTH + 1, invert);
-}
-
-// Clear the screen then print text.
-int SSD1306::print_overwrite(const char *text, bool invert)
-{
-	set_page(0);
-	return print_text(text, MAX_BUFFER_SIZE, invert);
 }
 
 SSD1306::SSD1306(uint sda, uint scl, i2c_inst_t *instance_i2c)

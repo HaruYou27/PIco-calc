@@ -29,17 +29,18 @@ InputMethodEditor *InputMethodEditor::get_singleton()
 
         singleton = new InputMethodEditor();
     }
+    renderer = RenderServer::get_singleton();
     return singleton;
 }
 
 char InputMethodEditor::scan_keys(void)
 {
-    for (int row = 0; row < 4; row++)
+    for (uint row = 0; row < 4; row++)
     {
         gpio_put(PIN_ROWs[row], true);
         sleep_ms(SleepDuration::SCAN);
 
-        for (int column; column < 4; column++)
+        for (uint column; column < 4; column++)
         {
             if(gpio_get(column))
             {
@@ -61,7 +62,7 @@ char InputMethodEditor::scan_keys(void)
 void InputMethodEditor::reset()
 {
     current_key = 0;
-    press_count = 0;
+    press_count = (letter_mode) ? 1 : 0;
     time_passed = 0;
 }
 
@@ -83,11 +84,11 @@ char InputMethodEditor::wait4input()
     {
         key = scan_keys();
         
-        if (time_passed > 300000 || (raw && can_sleep && key == '\b'))
+        if (time_passed > 30*1000 || (raw && key == '\b'))
         {
             // Emergency sleep !
             reset();
-            //renderer->toggle_display(false);
+            renderer->display_off();
             gpio_put(PIN_ROWs[0], true);
 
             while (gpio_get(PIN_COLUMNS[3]))
@@ -95,7 +96,7 @@ char InputMethodEditor::wait4input()
                 sleep_ms(SleepDuration::EMERGENCY);
             }
 
-            //renderer->toggle_display(true);
+            renderer->display_on();
             gpio_put(PIN_ROWs[0], false);
         }
 
@@ -108,10 +109,6 @@ char InputMethodEditor::wait4input()
         return key;
     }
 
-    if (letter_mode && current_key == 0)
-    {
-        ++press_count;
-    }
     if (key == current_key)
     {
         ++press_count;

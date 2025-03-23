@@ -10,7 +10,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 using namespace std;
 
-Application::Application(size_t menu_size)
+Application::Application()
 {
     renderer = RenderServer::get_singleton();
     ime = InputMethodEditor::get_singleton();
@@ -21,11 +21,6 @@ uint Application::page2index()
     return page * SSD1306::ROW_COUNT*2;
 }
 
-uint Application::line2index()
-{
-    return line + page2index();
-}
-
 uint Application::open_menu(const char* const *menu, size_t menu_size)
 {
     size_t page_end = menu_size / SSD1306::ROW_COUNT*2;
@@ -33,7 +28,6 @@ uint Application::open_menu(const char* const *menu, size_t menu_size)
     
     renderer->print_menu(menu, menu_size);
     ime->raw = true;
-    ime->can_sleep = true;
 
     while (true)
     {
@@ -63,7 +57,7 @@ uint Application::open_menu(const char* const *menu, size_t menu_size)
                 }
                 break;
             case '5':
-                return line2index();
+                return min(line + page2index(), menu_size - 1);
             case '6':
                 if (line < 8)
                 {
@@ -92,6 +86,8 @@ uint Application::open_menu(const char* const *menu, size_t menu_size)
                 line = 0;
                 renderer->print_menu(menu + page2index(), menu_size);
                 break;
+            case '\e':
+                return menu_size;
         }
     }
 }   

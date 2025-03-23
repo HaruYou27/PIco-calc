@@ -36,6 +36,10 @@ public:
 
     void print_menu(const char* const *menu, size_t size);
     int print_line(const char *text, uint8_t line, bool invert = false);
+    int print_line(const char *text, uint8_t line, const char *halt);
+
+    int display_on();
+    int display_off();
 
     static void text_wrap(std::string &text);
 };

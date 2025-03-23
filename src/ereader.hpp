@@ -12,9 +12,18 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #include "application.hpp"
 #include "e_reader/book.h"
 
+#include "pico/multicore.h"
+
 class eReader : Application
 {
+private:
+    const char *get_line_end(const char *book);
+    const char *get_line_begin(const char *book, const char *begin);
+    const char *draw_book(const char *book);
+    void open_book(uint index);
+
+    static void get_book_size();
 public:
-    eReader();
+    virtual int main() override;
 };
 #endif
