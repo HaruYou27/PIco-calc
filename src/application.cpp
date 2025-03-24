@@ -37,25 +37,25 @@ uint Application::open_menu(const char* const *menu, size_t menu_size)
                 line = 0;
                 page = page_end;
                 renderer->print_menu(menu + page2index(), menu_size);
-                break;
+                continue;
             case '2':
                 set_line((line == 15 || (page == page_end && line == line_end)) ? 0 : line + 1, menu);
-                break;
+                continue;
             case '3':
                 if (page == page_end)
                 {
-                    break;
+                    continue;
                 }
                 ++page;
                 line = 0;
                 renderer->print_menu(menu + page2index(), menu_size);
-                break;
+                continue;
             case '4':
                 if (line >= 8)
                 {
                     set_line(line - 8, menu);
                 }
-                break;
+                continue;
             case '5':
                 return min(line + page2index(), menu_size - 1);
             case '6':
@@ -63,29 +63,29 @@ uint Application::open_menu(const char* const *menu, size_t menu_size)
                 {
                     set_line((page == page_end) ? min(line + 8, line_end) : line + 8, menu);
                 }
-                break;
+                continue;
             case '7':
                 page = 0;
                 line = 0;
                 renderer->print_menu(menu, menu_size);
-                break;
+                continue;
             case '8':
                 if (!line)
                 {
                     set_line((page == page_end) ? line_end : 15, menu);
-                    break;
+                    continue;
                 }
                 set_line(line - 1, menu);
-                break;
+                continue;
             case '9':
                 if (!page)
                 {
-                    break;
+                    continue;
                 }
                 --page;
                 line = 0;
                 renderer->print_menu(menu + page2index(), menu_size);
-                break;
+                continue;
             case '\e':
                 return menu_size;
         }

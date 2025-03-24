@@ -17,12 +17,15 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 class eReader : Application
 {
 private:
-    const char *get_line_end(const char *book);
-    const char *get_line_begin(const char *book, const char *begin);
-    const char *draw_book(const char *book);
-    void open_book(uint index);
+    static const char *read_line_down(const char *book);
+    static const char *read_page_down(const char *book);
+    static const char *read_line_up(const char *book, const char *begin);
+    static const char *read_page_up(const char *book, const char *begin);
 
-    static void get_book_size();
+    void open_book(uint index);
+    const char *draw_page_down(const char *book);
+    const char *draw_page_up(const char *book, const char *begin);
+    static void get_book_end();
 public:
     virtual int main() override;
 };

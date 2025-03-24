@@ -16,16 +16,14 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 #include <string.h>
 #include <algorithm>
 
-#include "MoonBench5x8Variable.h"
+#include "font/MoonBench.h"
 
 class SSD1306
 {
 private:	
-	enum HEADER 
-	{
-		CONTROL_COMMAND = 0x00,
-		CONTROL_DATA    = 0x40,
-	};
+	static constexpr uint8_t CONTROL_COMMAND = 0x00;
+	static constexpr uint8_t CONTROL_DATA    = 0x40;
+	
 	enum COMMAND
 	{
 		SET_CONTRAST = 0x81,
@@ -60,6 +58,8 @@ private:
     ~SSD1306();
 
 	int set_page(uint8_t page);
+	static void draw_char(uint8_t *buffer, char character);
+	static void draw_char_inverted(uint8_t *buffer, char character);
 public:
 	enum SPECIFICATION
 	{
@@ -69,9 +69,10 @@ public:
 		PAGE_SIZE = 8,
 		MAX_BUFFER_SIZE = SCREEN_WIDTH * SCREEN_HEIGHT / PAGE_SIZE + 1,
 		BAUDRATE = 100 * 1000,
+		ROW_COUNT = SCREEN_HEIGHT / PAGE_SIZE,
+		CHAR_PER_ROW = SCREEN_WIDTH / (MoonBench_width + 1),
 	};
 	
-	static constexpr uint ROW_COUNT = SCREEN_HEIGHT / PAGE_SIZE;
     void operator=(const SSD1306 &) = delete;
     SSD1306(const SSD1306 &copy) = delete;
     SSD1306(const uint sda, const uint scl, i2c_inst_t *instance_i2c);
@@ -81,12 +82,13 @@ public:
 	int display_off();
     
 	int clear_screen();
-	int i2c_write(const uint8_t* buffer, const int length);
+	int i2c_write(const uint8_t* buffer, const int length, bool nostop = false);
 
-	int print_line(const char *text, uint line, bool invert = false);
-	int print_line(const char *text, const char *halt);
+	int print_line(const char *text, uint line);
+	int print_line_inverted(const char *text, uint line);
+	int print(const char *text, const char *halt);
 
-	int draw_image_fullscreen(const uint8_t *data, int width, int page, bool invert = false);
+	int draw_image_fullscreen(const uint8_t *data, const int width, const int page);
 };
 
 #endif

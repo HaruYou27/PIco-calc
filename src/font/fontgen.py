@@ -10,7 +10,7 @@ import numpy
 FONTSTR = """!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
 
 IN_PATH = "input/"
-for path in os.listdir():
+for path in os.listdir(IN_PATH):
     if path.endswith(".png"):
         print(path)
         img = Image.open(IN_PATH + path).convert('1')
@@ -29,9 +29,12 @@ for path in os.listdir():
                 for i in range(8):
                     pixel = image[y + i, x]
                     value = (value >> 1) | (0x80 if pixel == 0 else 0)
-                if not value:
-                    break
                 c_array += '0x%.2x,' % (value)
-            c_array = c_array.strip(',') + "},"
+            
+            stripped = c_array.strip("0x00,")
+            while (len(c_array) != len(stripped)):
+                c_array = stripped
+                stripped = c_array.strip("0x00,")
+            c_array = c_array.strip(",") + "},"
         file.write(c_array.strip(',') + '\n};')
         file.close()

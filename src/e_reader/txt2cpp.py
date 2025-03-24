@@ -33,7 +33,10 @@ for path in paths:
     # Filter out diacritics and keep only ASCII characters
     text_ascii = "".join(char for char in text if not unicodedata.combining(char))
     text = text_ascii
+
+    text = textwrap.fill(text, 32, replace_whitespace=False)
     text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+
     file_output.write('    "' + text + '",\n')
 file_output.write("\n};\n" + titles.strip(",") + "\n};\n")
 
