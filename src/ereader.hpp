@@ -17,16 +17,16 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 class eReader : Application
 {
 private:
-    static const char *read_line_down(const char *book);
-    static const char *read_page_down(const char *book);
-    static const char *read_line_up(const char *book, const char *begin);
-    static const char *read_page_up(const char *book, const char *begin);
-
     void open_book(uint index);
     const char *draw_page_down(const char *book);
     const char *draw_page_up(const char *book, const char *begin);
     static void get_book_end();
 public:
+    static const char *read_line_down(const char *book);
+    static const char *read_page_down(const char *book);
+    static const char *read_line_up(const char *book, const char *begin);
+    static const char *read_page_up(const char *book, const char *begin);
+
     virtual int main() override;
 };
 #endif

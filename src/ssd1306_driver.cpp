@@ -87,12 +87,12 @@ int SSD1306::set_page(uint8_t page)
 		CONTROL_COMMAND,
 		0x10 | 0, // higher column address
 		0 & 0x0F, // lower column address
-		0xB0 + page, // row address
+		static_cast<uint8_t>(0xB0 + page), // row address
 	};
 	return i2c_write(buffer, 4);
 }
 // Return number of bytes written, or PICO_ERROR_GENERIC if address not acknowledged, no device present.
-int SSD1306::i2c_write(const uint8_t* buffer, int length, bool nostop = false)
+int SSD1306::i2c_write(const uint8_t* buffer, int length, bool nostop)
 {
 	return i2c_write_blocking(i2c, SLAVE_ADDRESS, buffer, length, nostop);
 }
@@ -158,7 +158,6 @@ int SSD1306::print(const char *text, const char *halt)
 // Same as print_line() but invert the font color.
 int SSD1306::print_line_inverted(const char *text, uint line)
 {
-	set_page(min(line, static_cast<uint>(PAGE_SIZE)));
 	size_t size = SCREEN_WIDTH + 1;
 	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
 
@@ -176,8 +175,6 @@ int SSD1306::print_line_inverted(const char *text, uint line)
 // Print and overwrite a specific line. Stop at line end or null terminator.
 int SSD1306::print_line(const char *text, uint line)
 {
-	set_page(min(line, static_cast<uint>(PAGE_SIZE)));
-
 	size_t size = SCREEN_WIDTH + 1;
 	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
 

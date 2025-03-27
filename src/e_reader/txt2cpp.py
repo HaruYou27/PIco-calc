@@ -21,9 +21,11 @@ for path in os.listdir():
         paths.append(path)
 paths.sort()
 
+wrapper = textwrap.TextWrapper(32, replace_whitespace=False, tabsize=2)
+wrapper_title = textwrap.TextWrapper(32, max_lines=1, placeholder="", expand_tabs=False)
 for path in paths:
     print(path)
-    titles += '\n    "' + textwrap.shorten(path.replace(".txt", ""), 32, placeholder="") + '",'
+    titles += '\n    "' + wrapper_title.fill(path.replace(".txt", "")) + '",'
 
     file = open(path)
     text = file.read()
@@ -34,11 +36,11 @@ for path in paths:
     text_ascii = "".join(char for char in text if not unicodedata.combining(char))
     text = text_ascii
 
-    text = textwrap.fill(text, 32, replace_whitespace=False)
+    text = wrapper.fill(text)
     text = text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
 
     file_output.write('    "' + text + '",\n')
-file_output.write("\n};\n" + titles.strip(",") + "\n};\n")
+file_output.write("};\n" + titles.strip(",") + "\n};\n")
 
 file_output.write("static constexpr unsigned char BOOKS = " + str(len(titles)) + ";")
 

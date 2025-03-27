@@ -7,6 +7,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
 #include "ssd1306_driver.hpp"
+#include "ereader.hpp"
 
 int main()
 {
@@ -16,19 +17,19 @@ int main()
 
     SSD1306 *oled = new SSD1306(16, 17, i2c0);
     static constexpr uint32_t DELAY = 5000;
-    bool tick = true;
+    const char *begin = BOOK_DATA[1];
+    const char *book = begin;
+
     while (true)
     {
-        tick = !tick;
-        oled->print_overwrite("Konichiwa Sekai !", tick);
-        sleep_ms(DELAY);
-        oled->print_overwrite("Hello world !", tick);
-        sleep_ms(DELAY);
-        oled->print_overwrite("Raspberry pi pico", tick);
-        sleep_ms(DELAY);
-        oled->print_overwrite("HaruYou27", tick);
-        sleep_ms(DELAY);
-        oled->print_overwrite("Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit, sed\ndo eiusmod tempor incididunt ut\nlabore et dolore magna aliqua.\nUt enim ad minim veniam, quis\nnostrud exercitation ullamco\nlaboris nisi ut aliquip ex ea\ncommodo consequat. Duis aute", tick);
+        const char *halt = eReader::read_page_down(book);
+        if (halt == book)
+        {
+            book = begin;
+            continue;
+        }
+        oled->print(book, halt);
+        book = halt;
         sleep_ms(DELAY);
     }
 }

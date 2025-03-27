@@ -16,7 +16,7 @@ InputMethodEditor *InputMethodEditor::get_singleton()
 {
     if (singleton == nullptr)
     {
-        for (int index = 0; index < 4; index++)
+        for (uint index = 0; index < 4; index++)
         {
             gpio_init(PIN_COLUMNS[index]);
             gpio_init(PIN_ROWs[index]);

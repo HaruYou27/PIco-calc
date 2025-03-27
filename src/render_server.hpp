@@ -19,7 +19,6 @@ class RenderServer
 {
 private:
     static RenderServer *singleton;
-    static constexpr int ROW_COUNT = 8;
     
     RenderServer();
 
@@ -35,8 +34,8 @@ public:
     void clear_screen();
 
     void print_menu(const char* const *menu, size_t size);
-    int print_line(const char *text, uint8_t line, bool invert = false);
-    int print_line(const char *text, uint8_t line, const char *halt);
+    int print_line(const char *text, uint line);
+    int print_line_inverted(const char *text, uint line);
 
     int display_on();
     int display_off();

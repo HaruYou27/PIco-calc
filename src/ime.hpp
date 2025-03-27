@@ -18,8 +18,8 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 class InputMethodEditor
 {
 private:
-    static constexpr uint PIN_COLUMNS[4] = {5, 6, 7, 8};
-    static constexpr uint PIN_ROWs[4] = {13, 14, 15, 16};
+    static constexpr uint8_t PIN_COLUMNS[4] = {5, 6, 7, 8};
+    static constexpr uint8_t PIN_ROWs[4] = {13, 14, 15, 16};
 
     enum SleepDuration 
     {
