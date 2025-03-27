@@ -11,12 +11,11 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 int main()
 {
-    gpio_init(25);
-    gpio_set_dir(25, GPIO_OUT);
-    gpio_put(25, true);
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+    gpio_put(PICO_DEFAULT_LED_PIN, true);
 
     SSD1306 *oled = new SSD1306(16, 17, i2c0);
-    static constexpr uint32_t DELAY = 5000;
     const char *begin = BOOK_DATA[1];
     const char *book = begin;
 
@@ -30,6 +29,6 @@ int main()
         }
         oled->print(book, halt);
         book = halt;
-        sleep_ms(DELAY);
+        sleep_ms(5000);
     }
 }

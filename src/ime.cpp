@@ -9,27 +9,30 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 #include "ime.hpp"
 
-InputMethodEditor::InputMethodEditor() {}
+InputMethodEditor::InputMethodEditor()
+{
+    for (uint index = 0; index < 4; index++)
+    {
+        gpio_init(PIN_COLUMNS[index]);
+        gpio_init(PIN_ROWs[index]);
+    
+        gpio_set_dir(PIN_COLUMNS[index], false);
+        gpio_set_dir(PIN_ROWs[index], true);
+    
+        gpio_put(PIN_COLUMNS[index], false);
+    }
+    renderer = RenderServer::get_singleton();
+}
+
+InputMethodEditor::~InputMethodEditor() {}
 InputMethodEditor *InputMethodEditor::singleton = nullptr;
 
 InputMethodEditor *InputMethodEditor::get_singleton()
 {
     if (singleton == nullptr)
     {
-        for (uint index = 0; index < 4; index++)
-        {
-            gpio_init(PIN_COLUMNS[index]);
-            gpio_init(PIN_ROWs[index]);
-        
-            gpio_set_dir(PIN_COLUMNS[index], false);
-            gpio_set_dir(PIN_ROWs[index], true);
-        
-            gpio_put(PIN_COLUMNS[index], false);
-        }
-
         singleton = new InputMethodEditor();
     }
-    renderer = RenderServer::get_singleton();
     return singleton;
 }
 

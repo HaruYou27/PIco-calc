@@ -6,46 +6,30 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
-#ifndef RENDER_SERVER_HPP
-#define RENDER_SERVER_HPP
-
-#include <string>
-#include <math.h>
-#include <ctype.h>
-
 #include "ssd1306_driver.hpp"
+#include "sysinfo.hpp"
+#include <cstdio>
 
-class RenderServer
+using namespace std;
+
+int main()
 {
-private:
-    static RenderServer *singleton;
-    
-    RenderServer();
-    ~RenderServer();
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+    gpio_put(PICO_DEFAULT_LED_PIN, true);
 
-    bool is_screen_on = false;
-    uint contrast = 0x7F;
-public:
-    void operator=(const RenderServer &) = delete;
-    RenderServer(const RenderServer &copy) = delete;
-    static RenderServer *get_singleton();
+    SSD1306 *oled = new SSD1306(16, 17, i2c0);
+    oled->clear_screen();
+    SystemMonitor *sys = SystemMonitor::get_singleton();
+    char *buffer = new char[32];
 
-    static SSD1306 *screen0;
-    static SSD1306 *screen1;
-    
-    void clear_screen();
-
-    void print_menu(const char* const *menu, size_t size);
-    int print_line(const char *text, uint line);
-    int print_line_inverted(const char *text, uint line);
-
-    int display_on();
-    int display_off();
-
-    int set_contrast(uint value);
-    uint get_contrast();
-
-    static void text_wrap(std::string &text);
-};
-
-#endif
+    while (true)
+    {
+        sprintf(buffer, "System voltage: %.1f V", sys->read_voltage());
+        oled->print_line(buffer, 0);
+        sprintf(buffer, "Die temperature: %.1f C", sys->read_temperature());
+        oled->print_line(buffer, 1);
+        sleep_ms(1000);
+    }
+    return 0;
+}

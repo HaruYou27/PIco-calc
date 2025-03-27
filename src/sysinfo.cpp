@@ -6,46 +6,39 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
-#ifndef RENDER_SERVER_HPP
-#define RENDER_SERVER_HPP
+#include "sysinfo.hpp"
 
-#include <string>
-#include <math.h>
-#include <ctype.h>
-
-#include "ssd1306_driver.hpp"
-
-class RenderServer
+SystemMonitor::SystemMonitor()
 {
-private:
-    static RenderServer *singleton;
-    
-    RenderServer();
-    ~RenderServer();
+    adc_init();
+    adc_gpio_init(29);
+    adc_set_temp_sensor_enabled(true);
+}
 
-    bool is_screen_on = false;
-    uint contrast = 0x7F;
-public:
-    void operator=(const RenderServer &) = delete;
-    RenderServer(const RenderServer &copy) = delete;
-    static RenderServer *get_singleton();
+SystemMonitor::~SystemMonitor() {}
+SystemMonitor *SystemMonitor::singleton = nullptr;
 
-    static SSD1306 *screen0;
-    static SSD1306 *screen1;
-    
-    void clear_screen();
+SystemMonitor *SystemMonitor::get_singleton()
+{
+    if (singleton == nullptr)
+    {
+        singleton = new SystemMonitor();
+    }
+    return singleton;
+}
 
-    void print_menu(const char* const *menu, size_t size);
-    int print_line(const char *text, uint line);
-    int print_line_inverted(const char *text, uint line);
+float SystemMonitor::read_adc_volt(uint adc_pin)
+{
+    adc_select_input(adc_pin);
+    return adc_read() * 3.3f / (1 << 12);
+}
 
-    int display_on();
-    int display_off();
+float SystemMonitor::read_temperature()
+{
+    return 27.0f - (read_adc_volt(4) - 0.706f) / 0.001721f ;
+}
 
-    int set_contrast(uint value);
-    uint get_contrast();
-
-    static void text_wrap(std::string &text);
-};
-
-#endif
+float SystemMonitor::read_voltage()
+{
+    return 10 * read_adc_volt(3);
+}

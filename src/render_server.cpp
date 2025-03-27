@@ -10,15 +10,20 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 using namespace std;
 
-RenderServer::RenderServer() {}
+RenderServer::RenderServer()
+{
+    screen0 = new SSD1306(16, 17, i2c0);
+    screen1 = new SSD1306(26, 27, i2c1);
+}
+
+RenderServer::~RenderServer() {}
 RenderServer *RenderServer::singleton = nullptr;
 
 RenderServer *RenderServer::get_singleton()
 {
     if (singleton == nullptr)
     {
-        screen0 = new SSD1306(16, 17, i2c0);
-        screen1 = new SSD1306(26, 27, i2c1);
+        
         singleton = new RenderServer();
     }
     return singleton;
@@ -36,6 +41,17 @@ int RenderServer::display_off()
     return screen1->display_off();
 }
 
+uint RenderServer::get_contrast()
+{
+    return contrast;
+}
+
+int RenderServer::set_contrast(uint value)
+{
+    contrast = value;
+    screen0->set_contrast(value);
+    return screen1->set_contrast(value);
+}
 
 void RenderServer::print_menu(const char* const *menu, size_t size)
 {

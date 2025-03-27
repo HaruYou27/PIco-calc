@@ -59,7 +59,8 @@ private:
     char scan_keys();
     char get_char();
 
-    InputMethodEditor();    
+    InputMethodEditor();
+    ~InputMethodEditor();
     void operator=(const InputMethodEditor &) = delete;
     InputMethodEditor(const InputMethodEditor &copy) = delete;
 public:

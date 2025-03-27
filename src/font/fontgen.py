@@ -31,10 +31,6 @@ for path in os.listdir(IN_PATH):
                     value = (value >> 1) | (0x80 if pixel == 0 else 0)
                 c_array += '0x%.2x,' % (value)
             
-            stripped = c_array.strip("0x00,")
-            while (len(c_array) != len(stripped)):
-                c_array = stripped
-                stripped = c_array.strip("0x00,")
             c_array = c_array.strip(",") + "},"
         file.write(c_array.strip(',') + '\n};')
         file.close()

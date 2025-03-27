@@ -175,6 +175,7 @@ int SSD1306::print_line_inverted(const char *text, uint line)
 // Print and overwrite a specific line. Stop at line end or null terminator.
 int SSD1306::print_line(const char *text, uint line)
 {
+	set_page(line);
 	size_t size = SCREEN_WIDTH + 1;
 	uint8_t *buffer = new uint8_t[size] {CONTROL_DATA};
 
@@ -199,7 +200,7 @@ SSD1306::SSD1306(uint sda, uint scl, i2c_inst_t *instance_i2c)
 	gpio_pull_up(scl);
 
 	// init sequence based on https://github.com/adafruit/Adafruit_SSD1306
-	static constexpr uint8_t buffer[30] = {
+	static constexpr uint8_t buffer[] = {
 		CONTROL_COMMAND,
 		DISPLAY_OFF,
 		SET_DISPLAY_CLOCK_DIV, 0x80,
@@ -210,7 +211,6 @@ SSD1306::SSD1306(uint sda, uint scl, i2c_inst_t *instance_i2c)
 		SEGREMAP | 0x01,
 		COMSCANDEC,
 		SET_COM_PINS, 0x12,
-		SET_CONTRAST, 0x7F,
 		SET_PRECHARGE, 0xF1,
 		SETVCOMDETECT, 0x40,
 		DISPLAY_ALL_ON_RESUME,
@@ -223,5 +223,5 @@ SSD1306::SSD1306(uint sda, uint scl, i2c_inst_t *instance_i2c)
 		0xB0, // page start = 0
 		DISPLAY_ON
 	};
-	i2c_write(buffer, 30);
+	i2c_write(buffer, 28);
 }

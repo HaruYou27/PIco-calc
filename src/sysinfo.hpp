@@ -6,46 +6,27 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
-#ifndef RENDER_SERVER_HPP
-#define RENDER_SERVER_HPP
+#ifndef SYS_INFO_HPP
+#define SYS_INFO_HPP
 
-#include <string>
-#include <math.h>
-#include <ctype.h>
+#include "pico/stdlib.h"
+#include "hardware/adc.h"
 
-#include "ssd1306_driver.hpp"
-
-class RenderServer
+class SystemMonitor
 {
 private:
-    static RenderServer *singleton;
-    
-    RenderServer();
-    ~RenderServer();
-
-    bool is_screen_on = false;
-    uint contrast = 0x7F;
+    static SystemMonitor *singleton;
+    SystemMonitor();
+    ~SystemMonitor();
 public:
-    void operator=(const RenderServer &) = delete;
-    RenderServer(const RenderServer &copy) = delete;
-    static RenderServer *get_singleton();
+    static SystemMonitor *get_singleton();
+    void operator=(const SystemMonitor &) = delete;
+    SystemMonitor(const SystemMonitor &copy) = delete;
 
-    static SSD1306 *screen0;
-    static SSD1306 *screen1;
+    float read_adc_volt(uint adc_pin);
     
-    void clear_screen();
-
-    void print_menu(const char* const *menu, size_t size);
-    int print_line(const char *text, uint line);
-    int print_line_inverted(const char *text, uint line);
-
-    int display_on();
-    int display_off();
-
-    int set_contrast(uint value);
-    uint get_contrast();
-
-    static void text_wrap(std::string &text);
+    float read_temperature();
+    float read_voltage();
 };
 
 #endif
